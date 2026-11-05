@@ -301,6 +301,35 @@ Meaning: the Mac stack renders the game. The intro videos play and the title scr
 
 Log files (gitignored): `logs/set10-run1.log` to `-run3.log`, `logs/set10/` (window lists, process snapshots, screenshots).
 
+### Run set 11 (debug channels, watched) and the game's own crash report
+
+Run set 11 on 05/11/2026. Approved by Adam: "Approve run set 11", run on my own. Same settings as set 10 plus `+timestamp,+process,+seh,err+all`. Same watcher script.
+
+| Item | Result |
+|---|---|
+| Run lengths | 63 s, 65 s, 33 s. Wrapper exit code 0. No access violation. No timeout kill |
+| Screens | Runs 1 and 2 were still in the intro videos (dashboard clip, Turn 10 Studios) when the game ended. With debug logging the game runs slower, so the title screen is not reached |
+| End of each run | The same graceful shutdown sequence: the game saves files (`ReplaceFileW`), sets the power throttling state, unregisters window and session notifications, then runs its exit code (`AppPolicyGetProcessTerminationMethod`). No exception, no Wine error. The game itself decides to quit |
+| Game's debug output | Only the Steam API start message, a WebView2 folder message, and one Chromium message ("Failed to wait for process exit or stop event") |
+| **`PreCrashReport.xml`** | The game wrote this file in its AppData folder in the bottle (`drive_c/users/crossover/AppData/Local/ForzaHorizon5/PreCrashReport.xml`, 1076 bytes, 21:25, at the end of the last run). A full private copy is in evidence/private/ (it holds user and session IDs, not published) |
+
+Fields of `PreCrashReport.xml` that matter (values copied; IDs left out):
+
+| Field | Value |
+|---|---|
+| `UI_SCENE` | `Splash` (the game was in the intro) |
+| `MEM_USED` | 149228900352 (about 149 GB) |
+| `MEM_LIMIT` | 25769799680 (24 GiB, the RAM of this Mac) |
+| `MEM_AVAILABLE` | 25769799680 |
+| `UPTIME`, `TOTAL_LAUNCHES` | 0 |
+| `BUILD`, `PLATFORM`, `FLAVOR`, `SANDBOX` | 688109, `PC_Steam`, `ReleaseFinal`, `RETAIL` |
+| GPU seen by the game | `Intel(R) Arc(TM) A750 Graphics` (the spoof reached the game), driver `35.0.15.8180`, bucket `Extreme|60|1080` |
+| OS seen by the game | Windows 11 Pro, `10.0.22000.588`. CPU name `VirtualApple @ 2.50GHz` |
+
+Meaning: the game wrote a "pre crash" report while still in the splash scene, then quit on its own. The report says the memory in use (149 GB) is about six times the memory limit (24 GiB). That is a strong candidate for the cause: the game compares its memory use with its limit, sees a number far over the limit and takes its crash path. Where the 149 GB comes from is unknown. It is probably virtual memory or large reservations (for example GPU heaps or address space that Wine, D3DMetal or the game reserves), not real use. Not proven. The file is overwritten at every launch, so this is the report of the last run only.
+
+Log files (gitignored): `logs/set11-run1.log` to `-run3.log` (475 MB, 515 MB, 232 MB), `logs/set11/`.
+
 Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
 
 | Copy | Size | SHA-256 starts | Note |
@@ -406,6 +435,8 @@ Update 05/11/2026 (Adam's screen report for set 8): the screen is blank or froze
 Update 05/11/2026 (run set 9): the game runs 40 to 84 s, shows a blank window and then ends through its own shutdown path, after anti-debug style process queries. No Wine crash. The rating stays "possible" but the end state is not understood. Plain launch tests (no debug channels) come next.
 
 Update 05/11/2026 (run set 10): screenshots show the intro videos and, in one run, the Forza Horizon 5 title screen. So the game renders on this Mac with the native `concrt140.dll` and the GPU spoof. Rating: "possible", now with rendering evidence. The remaining blocker is that the game ends itself within seconds. Nobody has pressed a key at the title screen yet.
+
+Update 05/11/2026 (run set 11): the game's own `PreCrashReport.xml` shows a memory count of 149 GB against a 24 GiB limit while in the splash scene, and the game quits itself without any Wine error. This is the first concrete reason for the self-ending runs. Rating: "possible", with a named lead: the memory accounting.
 
 Rating: possible.
 
