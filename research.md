@@ -230,6 +230,22 @@ Meaning: the hypothesis about Wine's `concrt140` is neither confirmed nor reject
 
 Change on 05/11/2026 (approved by Adam: "Yes, set it"): a per-app DLL override was added to the bottle registry with `wine reg add`: key `HKCU\Software\Wine\AppDefaults\ForzaHorizon5.exe\DllOverrides`, value `concrt140` = `native,builtin`. `cxbottle.conf` is unchanged (`5fddfef4`). Backup of the bottle registry files: `~/Backups/steam-forza-5-registry-05112026/`. Undo: `wine --bottle "Steam forza 5" reg delete "HKCU\Software\Wine\AppDefaults\ForzaHorizon5.exe\DllOverrides" /v concrt140 /f`, or copy the backup back with Wine stopped. Not yet proven to take effect: the next log must show `CONCRT140.dll` as `native`.
 
+### Run set 7 (native concrt140 loaded)
+
+Run set 7 on 05/11/2026. Approved by Adam: "Approve run set 7" (restarted once after a stuck debugger dialog, "can we redo this run"). The registry override above is active. Channels `+loaddll,+seh,err+all`, no log cap, Steam running, no GPU spoof, no file change.
+
+| Item | Result |
+|---|---|
+| Override works | Yes. `CONCRT140.dll` loads as `native` in every run (log line). The first stuck run showed the same |
+| Crash at `+0x4f77cb0` | Not seen in runs 1 and 2 (0 access violations at that address). In earlier sets it hit in 5 of 7 runs. With 2 runs this is a hint, not a proof |
+| Run 1 | No access violation. The log ends in the middle of normal activity (no shutdown lines). The process ended with no Wine dialog. Adam saw a silent exit and the game started again (the loop started run 2). Cause of the abrupt end: unknown |
+| Run 2 | A different crash: read fault at `ForzaHorizon5.exe+0x667BA5`, `rax = 0`, read of address `0x10` (null pointer plus offset). Eleven frames, all in the EXE (`+0x67f31b`, `+0x673ef6`, `+0x6f682b`, `+0x4f7e19d`, `+0x6ff0b3`, `+0x4e2686b`, `+0x947676`, then thread entry). Same address as public report 4 and as set 4 run 3. The code bytes around it look like obfuscated code (junk bytes between jumps), which fits an anti-tamper layer. Not studied further |
+| Exceptions | `c000001d`: 277948 (run 1) and 331173 (run 2) |
+
+Meaning: with the native `concrt140.dll`, crash 1 did not appear in 2 runs, but the game still ends. This supports the hypothesis that Wine's `concrt140` causes crash 1. It does not fix the game: a second fault (a null pointer read) and an abrupt exit remain. Run 3 was still running when this was written.
+
+Log files (gitignored): `logs/set7-run1.log`, `logs/set7-run2.log`, `logs/set7-run3.log`, `logs/stuck/set7-run1-stuck-dialog.log`. Crash file: evidence/private/fh5-crash-backtrace-set7-run2.txt.
+
 Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
 
 | Copy | Size | SHA-256 starts | Note |
