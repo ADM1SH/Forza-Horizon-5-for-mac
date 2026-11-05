@@ -70,18 +70,25 @@ Recommendation: A first. B only if A shows that the patched `kernelbase.dll` blo
 
 After Phase 4 and the Phase 2 and 3 results, show the summary and wait for approval before any patch work.
 
-## Phase 5: use the third-party proxy code (DRAFT, nothing approved, nothing run)
+## Phase 5: our own proxy (route c, MIT) (PLAN, step 1 waits for Adam's approval)
 
-Source (cloned read-only, without the prebuilt DLL): `xvferxedd/fh5-d3dmetal-fix`, GPL-3.0, about 4650 lines of C. Needs Adam's answers to decisions.md questions 7 and 8 first.
+Why: the game reads process memory counters in its own threads (research.md section 3: 18 to 25 `ProcessVmCounters` queries per run, one right before the quit), and the game's own report showed 149 GB against a 24 GiB limit. A third-party report (section 5.7) says that a clamp of this counter, a descriptor size fix and an unwind guard are needed later. We write our own code. No third-party code is copied (decisions.md D-019).
 
-Facts from the source (read only): `memfix.h` replaces `K32GetProcessMemoryInfo` and clamps `PagefileUsage` and `PrivateUsage` (Wine fills them from the task virtual size, about 65 GB there) to the working set and to total RAM. `stride.h` makes D3DMetal's 24-byte descriptors look 32 bytes wide for the game. `unwindguard.h` catches access violations in `RtlVirtualUnwind2`. `d3d12.c` (from Highball) serves timestamp queries and a shader model fallback. Build: `x86_64-w64-mingw32-gcc` is already installed on this Mac.
+Design (own, small):
+
+| File | Purpose |
+|---|---|
+| `proxy/vmclamp.h` | One pure function: given the counter values, the working set and the physical RAM, return clamped values. No Windows calls. Tested on the Mac |
+| `proxy/vmclamp_test.c` | Host test (clang on macOS). Written first. Cases: normal values pass unchanged, a huge private usage is clamped to physical RAM, working set larger than RAM, zero values, struct size variants |
+| `proxy/d3d12_proxy.c` | `DllMain` and exports. Forwards the D3D12 exports to the original provider DLL (path from an environment variable). Patches the memory counter API for the game process only. Refuses to patch if the module checks fail (CODE_STYLE.md) |
+| `proxy/d3d12.def` | The export list (ordinals as the game imports them; verify from the EXE import table first) |
+| `proxy/build.sh` | Builds with the installed `x86_64-w64-mingw32-gcc`. No Docker, no install |
 
 Steps (each needs Adam's approval before it runs):
 
-1. Record the permission and the licenses: a `NOTICE` file with the origin of every file (Highball, `xvferxedd`, `whyAm-i`), the license route (decisions.md question 8), a copy of the permission in evidence/private/.
-2. Build `d3d12.dll` from source in the scratchpad with the installed mingw compiler. Do not run it. Compare its behavior notes with the README. Do not use the prebuilt binary.
-3. Put the proxy in the game folder (adds one file to the game folder), set a registry override `d3d12` = native for `ForzaHorizon5.exe` (same method as `concrt140`, undo by `reg delete`), point `HB_D3D12_REAL` to the original provider DLL, and use the GPU identity of the third-party report (RTX 4070) on the command line. Check first if the provider file `apd12.dll` is needed in the bottle `system32` (it is a bottle file change).
-4. Test run through Steam with the watcher. Compare with the current loading screen result.
-5. Optional, only if needed: the `ntdll` patch and the Steam detour tools change CrossOver files. Not planned.
+1. Write `vmclamp.h` and its test first (TDD). Run the test on the Mac. No bottle involved. Commit only when Adam asks.
+2. Verify from the EXE which exports the game imports from `d3d12.dll` (names or ordinals). Write `d3d12.def` and `d3d12_proxy.c`. Build with mingw. Check exports with `objdump`. Do not run it in the bottle.
+3. Install: copy `d3d12.dll` into the game folder (adds one file; undo by removing it), registry override `d3d12` = native for `ForzaHorizon5.exe` (undo by `reg delete`), set the provider path variable on the command line. Test run through Steam with the watcher. Needs approval.
+4. Compare with the current loading result. If the game reaches `0x800705AA` or the loading-tips crash, plan the next feature (descriptor size, unwind guard) from API documentation and our logs, not from third-party code.
 
-Risks: GPL-3.0 code inside an MIT repo (see question 8), a file added to the game folder (remove it to undo), a native override that fails to load (the game then cannot create a device), and a mismatch between this proxy and this CrossOver build (the third party tested Highball CrossOver r28, not this bundle).
+Risks: the proxy cannot load the provider (the game has no graphics device), the patch breaks when the Wine build changes (refuse on a module check), a file in the game folder (remove to undo), and similarity to third-party code (D-019, a human review before release). The research phase rule "no patches" is lifted by Adam only for this plan.
