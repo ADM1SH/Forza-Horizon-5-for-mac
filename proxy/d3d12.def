@@ -1,0 +1,18 @@
+; Export list for the d3d12.dll proxy. Every export forwards to the provider copy named apd12.dll.
+; Names and ordinals 100 to 111 come from the provider's own export table (checked 05/11/2026).
+; The game imports ordinal 101 (D3D12CreateDevice) and D3D12SerializeVersionedRootSignature.
+; License: MIT (see LICENSE).
+LIBRARY d3d12.dll
+EXPORTS
+    GetBehaviorValue = apd12.GetBehaviorValue @100
+    D3D12CreateDevice = apd12.D3D12CreateDevice @101
+    D3D12GetDebugInterface = apd12.D3D12GetDebugInterface @102
+    D3D12CoreCreateLayeredDevice = apd12.D3D12CoreCreateLayeredDevice @103
+    D3D12CoreGetLayeredDeviceSize = apd12.D3D12CoreGetLayeredDeviceSize @104
+    D3D12CoreRegisterLayers = apd12.D3D12CoreRegisterLayers @105
+    D3D12CreateRootSignatureDeserializer = apd12.D3D12CreateRootSignatureDeserializer @106
+    D3D12CreateVersionedRootSignatureDeserializer = apd12.D3D12CreateVersionedRootSignatureDeserializer @107
+    D3D12EnableExperimentalFeatures = apd12.D3D12EnableExperimentalFeatures @108
+    D3D12GetInterface = apd12.D3D12GetInterface @109
+    D3D12SerializeRootSignature = apd12.D3D12SerializeRootSignature @110
+    D3D12SerializeVersionedRootSignature = apd12.D3D12SerializeVersionedRootSignature @111
