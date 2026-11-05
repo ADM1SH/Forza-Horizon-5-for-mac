@@ -345,6 +345,24 @@ Meaning: the self-ending is not caused only by the memory report. Two of the set
 
 Log files (gitignored): `logs/set12/`, `logs/set12-run*.log` (2 lines each, plain launch). Private copies: evidence/private/fh5-PreCrashReport-set12-run1.xml to `-run3.xml`.
 
+### Run set 13 (one debug run with file, HTTP and socket channels)
+
+Run set 13 on 05/11/2026. Approved by Adam: "Approve debug run". One run, Adam at the Mac. Channels `+timestamp,+process,+seh,+file,+winhttp,+winsock,err+all`, native `concrt140.dll`, GPU spoof on the command line. Log 604 MB. Adam did not report a key press: the game never reached the title screen in this run.
+
+| Item | Result |
+|---|---|
+| Length and end | 72 s. The last captured frame (67 s) shows the Xbox Game Studios intro logo fading. The game then quit by itself (wrapper exit code 0). No access violation, no dialog |
+| Network | Only the WebView2 browser process uses HTTP: one request to `nav.smartscreen.microsoft.com:443` at about +50 s. Socket connects to two public addresses on port 443 (non-blocking, normal "pending" results) and DNS lookups to the Mac's resolver. No sign of the game itself calling a server before the quit |
+| Files at start | The game tries to open `ShutdownReport.xml`, `HangReport.xml` and `CrashReport.xml` in its AppData folder at about +10 s. None exists. These are the game's own crash-state files |
+| Files at the end | At the end the game thread removes the WebView2 profile temp files (`load_statistics.db-shm` and `-wal`), writes to pipe handles, calls `RtlCaptureStackBackTrace` 3 times, unregisters window and session notifications, probes `dxgi.dll`, `d3d.dll` (absent), `ddraw.dll` and `opengl32.dll` in `system32`, then runs its exit path. The Steam overlay log (`gameoverlay_renderer.txt`) is written about 220 times during the run |
+| `PreCrashReport.xml` | Not rewritten (still the 21:25 file from set 11). `LastLaunch.timestamp` is also still 21:25. So the game does not reach the point that writes these in sets 12 and 13 |
+
+Meaning: the quit begins in the intro video sequence in this run (about 5 s after the Turn 10 logo) and in other runs 3 s after the title screen. The order at the end is WebView2 profile teardown, then window teardown, then exit. That is a deliberate shutdown, not a crash. Three stack captures right before it fit an error or log call inside the game, but the text is not visible in the log. Not proven. The game does not depend on a network call that the log shows.
+
+Candidates still open: a failed check at the stage change (intro to title, or title to sign-in) that is logged only inside the game, a check by the protection layer, or Steam (for example an app ownership check through `steamclient64.dll` and the overlay).
+
+Log files (gitignored): `logs/set13-run1.log`, `logs/set13/`.
+
 Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
 
 | Copy | Size | SHA-256 starts | Note |
@@ -454,6 +472,8 @@ Update 05/11/2026 (run set 10): screenshots show the intro videos and, in one ru
 Update 05/11/2026 (run set 11): the game's own `PreCrashReport.xml` shows a memory count of 149 GB against a 24 GiB limit while in the splash scene, and the game quits itself without any Wine error. This is the first concrete reason for the self-ending runs. Rating: "possible", with a named lead: the memory accounting.
 
 Update 05/11/2026 (run set 12): no new crash report, and Adam saw the title screen for about 3 s in one run. The memory lead from set 11 is weaker. The game quits itself at several points (intro, title). Rating: "possible". The cause of the quit is open.
+
+Update 05/11/2026 (run set 13): the debug log shows a deliberate shutdown (WebView2 teardown, window teardown, exit) after the intro videos, with no network call by the game and no fault. The cause stays open. Rating: "possible".
 
 Rating: possible.
 

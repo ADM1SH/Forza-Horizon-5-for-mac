@@ -46,6 +46,7 @@ Updated: 05/11/2026.
 - Ran set 10 on my own (plain launch, watcher, window screenshots). The game shows intro videos and a title screen (research.md section 3).
 - Ran set 11 on my own. Found the game's own PreCrashReport.xml (research.md section 3).
 - Ran set 12 (plain, with a copy of PreCrashReport.xml after each run). No new report. Corrected the memory lead in research.md.
+- Ran set 13 (one debug run with file, HTTP and socket channels). Orderly shutdown, no fault.
 - Changed nothing in the bottle, CrossOver, Steam, the game folder or the FH4 repo. Only read-only commands ran (find, grep, stat, shasum).
 
 ## 5. Failed attempts
@@ -54,8 +55,8 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Run set 12 is done. The game quits itself at the intro or about 3 s after the title screen, with no new crash report. The memory number from set 11 is a weak lead (research.md section 3).
-2. Next: one debug run with Adam at the Mac, with `+winhttp,+winsock,+file` to see what comes before the quit (task_today.md). Needs Adam's approval.
+1. Run set 13 is done. The game shuts itself down in the intro videos, in an orderly way, with no fault and no network call by the game (research.md section 3).
+2. Next: a launch from the Steam window, then a run that finds the caller of the quit (task_today.md). Needs Adam's approval.
 3. Settings that matter: native `concrt140.dll` (registry override) and the GPU spoof (command line).
-4. Open approvals: permanent settings, Steam window launch, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
-5. Local logs in logs/ use about 6.5 GB. The watcher scripts are in the session scratchpad. Delete old logs only with Adam's approval.
+4. Open approvals: permanent settings, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
+5. Local logs in logs/ use about 6.9 GB. The watcher scripts are in the session scratchpad. Delete old logs only with Adam's approval.
