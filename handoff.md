@@ -56,7 +56,7 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Steam launch (sets 14 and 15): Adam accepted the license agreement and signed in. The game reached "LOADING... PLEASE WAIT" (Ver. 688.109) and ran more than 7 minutes (research.md section 3). The watcher `logs/set16/` records until it ends or 60 minutes pass. Set 17 (05/11/2026): same Steam launch with the NVIDIA RTX 4070 identity. The identity reached the game, but the load stayed stuck (research.md section 3). Third-party repo study: the descriptor stride fix is the first proxy feature to build, the memory clamp is an experiment.
+1. Steam launch (sets 14 and 15): Adam accepted the license agreement and signed in. The game reached "LOADING... PLEASE WAIT" (Ver. 688.109) and ran more than 7 minutes (research.md section 3). The watcher `logs/set16/` records until it ends or 60 minutes pass. Set 17 (05/11/2026): same Steam launch with the NVIDIA RTX 4070 identity. The identity reached the game, but the load stayed stuck (research.md section 3). Phase 5 step 1 done 05/11/2026: `proxy/vmclamp.h` and `proxy/vmclamp_test.c`, 11 cases pass (not committed). Third-party repo study: the descriptor stride fix is the first proxy feature to build, the memory clamp is an experiment.
 2. Next: read the end of that run, then decide with Adam about the external proxy repo (section 5.7). No download without approval.
 3. Settings that matter: native `concrt140.dll` (registry override), the GPU spoof (Steam started with `D3DM_*` variables, not permanent), the Steam license agreement accepted.
 4. Open approvals: permanent settings, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).

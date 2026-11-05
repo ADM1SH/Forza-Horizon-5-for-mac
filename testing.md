@@ -20,3 +20,4 @@ No code exists yet. These are the research checks.
 - [x] No `/Users/<name>` path in a public file (05/11/2026).
 - [x] `git status` shows CLAUDE.md and evidence/private/ as ignored (05/11/2026).
 - [x] No `.dll`, `.exe`, `.vdf`, `.acf` or log file is staged (05/11/2026).
+- [x] Host test for the memory clamp passes: `clang -std=c11 -Wall -Wextra -Werror -o /tmp/vmclamp_test proxy/vmclamp_test.c && /tmp/vmclamp_test` prints `all checks passed` (05/11/2026).

@@ -6,7 +6,7 @@ Status on 05/11/2026: through Steam (agreement accepted by Adam, signed in), FH5
 
 Steps:
 
-1. Set 17 (NVIDIA identity) did not end the stuck load. Ask Adam what the game shows now and stop it with him. Then decide the next step: Phase 5 step 1 (vmclamp test) or another test. Earlier item: check the result of the Steam run (the watcher in logs/set16/): did loading finish, did the game reach the menu or free roam, or did it end? Ask Adam what he saw.
+1. Phase 5 step 1 is done on the host (`proxy/vmclamp.h`, `proxy/vmclamp_test.c`, not committed). Next: read the EXE import table for memory APIs (read-only), then ask Adam to approve step 2 (exports, `.def`, mingw build, no bottle run). Earlier item: check the result of the Steam run (the watcher in logs/set16/): did loading finish, did the game reach the menu or free roam, or did it end? Ask Adam what he saw.
 2. If the game crashes with `0x800705AA` or at the loading-tips screen, that matches the external report. Then ask Adam if he wants to study that proxy (read-only, license GPL-3.0, no copy of code into this MIT repo).
 3. Do not download or run the third-party `d3d12.dll` or the AI-agent install prompt without Adam's explicit approval and a source check.
 4. Later approvals: make the settings permanent, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).

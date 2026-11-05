@@ -70,7 +70,7 @@ Recommendation: A first. B only if A shows that the patched `kernelbase.dll` blo
 
 After Phase 4 and the Phase 2 and 3 results, show the summary and wait for approval before any patch work.
 
-## Phase 5: our own proxy (route c, MIT) (PLAN, step 1 waits for Adam's approval)
+## Phase 5: our own proxy (route c, MIT) (step 1 done on the host, steps 2 to 4 wait for Adam's approval)
 
 Why: the game reads process memory counters in its own threads (research.md section 3: 18 to 25 `ProcessVmCounters` queries per run, one right before the quit), and the game's own report showed 149 GB against a 24 GiB limit. A third-party report (section 5.7) says that a clamp of this counter, a descriptor size fix and an unwind guard are needed later. We write our own code. No third-party code is copied (decisions.md D-019).
 
@@ -78,16 +78,16 @@ Design (own, small):
 
 | File | Purpose |
 |---|---|
-| `proxy/vmclamp.h` | One pure function: given the counter values, the working set and the physical RAM, return clamped values. No Windows calls. Tested on the Mac |
-| `proxy/vmclamp_test.c` | Host test (clang on macOS). Written first. Cases: normal values pass unchanged, a huge private usage is clamped to physical RAM, working set larger than RAM, zero values, struct size variants |
+| `proxy/vmclamp.h` | One pure function on plain field values (private, pagefile, virtual, working set and their peaks). It clamps values above physical RAM minus a margin. No Windows calls. Tested on the Mac |
+| `proxy/vmclamp_test.c` | Host test (clang on macOS). Written first. Cases: normal values pass unchanged, a huge private usage is clamped to physical RAM, working set larger than RAM, zero values, a zero margin, peaks never below current. Struct size variants belong to the step 2 adapter, because the pure function takes a `has_private` flag |
 | `proxy/d3d12_proxy.c` | `DllMain` and exports. Forwards the D3D12 exports to the original provider DLL (path from an environment variable). Patches the memory counter API for the game process only. Refuses to patch if the module checks fail (CODE_STYLE.md) |
 | `proxy/d3d12.def` | The export list (ordinals as the game imports them; verify from the EXE import table first) |
 | `proxy/build.sh` | Builds with the installed `x86_64-w64-mingw32-gcc`. No Docker, no install |
 
 Steps (each needs Adam's approval before it runs):
 
-1. Write `vmclamp.h` and its test first (TDD). Run the test on the Mac. No bottle involved. Commit only when Adam asks.
-2. Verify from the EXE which exports the game imports from `d3d12.dll` (names or ordinals). Write `d3d12.def` and `d3d12_proxy.c`. Build with mingw. Check exports with `objdump`. Do not run it in the bottle.
+1. [x] Write `vmclamp.h` and its test first (TDD). Run the test on the Mac. No bottle involved. Commit only when Adam asks. Done 05/11/2026: 11 test cases pass, a mutation check fails as expected. The function also clamps virtual size, which the first plan did not say. Which counter feeds the game's 151 GB figure is still unproven.
+2. Before this step, read the EXE import table for memory APIs (`K32GetProcessMemoryInfo`, `NtQueryInformationProcess`, `GlobalMemoryStatusEx`). The result decides where the hook goes. Then verify from the EXE which exports the game imports from `d3d12.dll` (names or ordinals). Write `d3d12.def` and `d3d12_proxy.c`. Build with mingw. Check exports with `objdump`. Do not run it in the bottle.
 3. Install: copy `d3d12.dll` into the game folder (adds one file; undo by removing it), registry override `d3d12` = native for `ForzaHorizon5.exe` (undo by `reg delete`), set the provider path variable on the command line. Test run through Steam with the watcher. Needs approval.
 4. Compare with the current loading result. If the game reaches `0x800705AA` or the loading-tips crash, plan the next feature (descriptor size, unwind guard) from API documentation and our logs, not from third-party code.
 
