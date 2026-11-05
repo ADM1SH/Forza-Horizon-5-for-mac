@@ -247,6 +247,23 @@ Meaning: with the native `concrt140.dll`, crash 1 did not appear in 2 runs, but 
 
 Log files (gitignored): `logs/set7-run1.log`, `logs/set7-run2.log`, `logs/set7-run3.log`, `logs/stuck/set7-run1-stuck-dialog.log`. Crash files: evidence/private/fh5-crash-backtrace-set7-run2.txt and `-run3.txt`.
 
+### Run set 8 (native concrt140 and GPU spoof)
+
+Run set 8 on 05/11/2026. Approved by Adam: "Approve run set 8". Registry override active (native `concrt140.dll`), GPU spoof on the command line (`D3DM_*` variables), channels `+loaddll,+seh,err+all`, no log cap, Steam running, no file change. Three runs. These logs have no timestamps, so run lengths are unknown.
+
+| Item | Result |
+|---|---|
+| Access violations | 0 in all three logs. Neither `+0x4f77cb0` nor `+0x667BA5` appears |
+| Runs 1 and 3 | Went further: `PartyXboxLive.dll` and 7 loads of `msedgewebview2` files (the Xbox sign-in browser). One C++ exception (`e06d7363`, a normal thrown exception) in each. Messages: `SteamAPI_Init` OK, `RoGetActivationFactory` could not find `Windows.System.Profile.PlatformDiagnosticsAndUsageData...` (2 times), "appending command line" (7 times, WebView2 child processes). No crash dialog text from Adam for these runs |
+| Run 2 | `SteamAPI_Init` OK, no WebView2 load, no access violation. The log ends with no shutdown lines. How it ended is unknown |
+| Shutdown lines | None in any log, so the processes ended abruptly (closed by Adam or killed) and not through a normal exit |
+| Exceptions | `c000001d` about 429000, 332000 and 766000. Handled by the in-EXE handler as before |
+| Log sizes | 374 MB, 289 MB, 667 MB |
+
+Meaning: the combination of the native `concrt140.dll` and the GPU spoof removed both known access violations (0 of 3 runs). This is the best result so far: the game gets to the Xbox sign-in browser stage. What Adam saw on screen is not recorded yet.
+
+Log files (gitignored): `logs/set8-run1.log`, `logs/set8-run2.log`, `logs/set8-run3.log`.
+
 Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
 
 | Copy | Size | SHA-256 starts | Note |
@@ -344,6 +361,8 @@ Update 05/11/2026 (run set 4): with Steam running, FH5 runs into game code and c
 Update 05/11/2026 (run set 5): the game-code crash at `+0x4f77cb0` happened in 2 of 3 runs with a GPU spoof on the command line. Run 3 passed it and reached the start screen (WebView2 loaded). The rating moves toward "possible" with more confidence: the game can run past the fault. No patch work.
 
 Update 05/11/2026 (run set 7): with the native `concrt140.dll`, the `+0x4f77cb0` crash is gone in 3 of 3 runs. Two runs crash at `+0x667BA5` (null pointer read, public report 4 address), one run ends abruptly. The rating stays "possible" and the evidence improves: two named faults, one with a likely Wine cause and one with a reported GPU-spoof fix.
+
+Update 05/11/2026 (run set 8): with the native `concrt140.dll` and the GPU spoof, no access violation in 3 of 3 runs, and two runs reach the Xbox sign-in browser (WebView2). The rating stays "possible" and gets stronger. Open: what the screen shows, and why the processes end.
 
 Rating: possible.
 

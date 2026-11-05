@@ -51,8 +51,8 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Run set 7 is done: with the native `concrt140.dll` (registry override), the `+0x4f77cb0` crash is gone in 3 of 3 runs. Runs 2 and 3 crash at `+0x667BA5` (research.md section 3). Run 1 ended abruptly.
-2. Next: run set 8 with the native `concrt140` plus the GPU spoof (task_today.md). Needs Adam's approval.
-3. Open approvals: control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
+1. Run set 8 is done: 0 access violations in 3 runs with the native `concrt140.dll` (registry override) and the GPU spoof (command line). Two runs reach the Xbox sign-in browser (research.md section 3).
+2. Ask Adam what he saw on screen, then ask to approve run set 9 with `+process,+timestamp` (task_today.md).
+3. Open approvals: permanent GPU spoof (Adam sets it), control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
 4. Undo for the override is in research.md section 4. Rollback of Plan A is in implementation_plan.md Phase 2b step 7.
-5. Local logs in logs/ use about 1.6 GB. Delete old ones only with Adam's approval.
+5. Local logs in logs/ use about 3 GB. Delete old ones only with Adam's approval.
