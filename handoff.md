@@ -51,8 +51,8 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Run set 8 is done: 0 access violations in 3 runs with the native `concrt140.dll` (registry override) and the GPU spoof (command line). Two runs reach the Xbox sign-in browser (research.md section 3).
-2. Ask Adam what he saw on screen, then ask to approve run set 9 with `+process,+timestamp` (task_today.md).
-3. Open approvals: permanent GPU spoof (Adam sets it), control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
+1. Run set 9 is done: the game ends by itself after 40 to 84 s, with a blank window, after anti-debug style queries (research.md section 3).
+2. Next: run set 10, a plain launch without debug channels (task_today.md). Needs Adam's approval.
+3. Open approvals: Steam window launch, permanent GPU spoof (Adam sets it), control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
 4. Undo for the override is in research.md section 4. Rollback of Plan A is in implementation_plan.md Phase 2b step 7.
-5. Local logs in logs/ use about 3 GB. Delete old ones only with Adam's approval.
+5. Local logs in logs/ use about 5 GB. Delete old ones only with Adam's approval.

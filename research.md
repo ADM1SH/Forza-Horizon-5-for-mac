@@ -264,6 +264,26 @@ Meaning: the combination of the native `concrt140.dll` and the GPU spoof removed
 
 Log files (gitignored): `logs/set8-run1.log`, `logs/set8-run2.log`, `logs/set8-run3.log`.
 
+### Run set 9 (native concrt140, GPU spoof, WebView2 flag)
+
+Run set 9 on 05/11/2026. Approved by Adam: "Approve run set 9". Same setup as set 8, plus `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--disable-gpu` on the command line, and channels `+loaddll,+seh,+process,+timestamp,err+all`. Three runs. Adam's report: "blank then crashes". No screenshot was sent.
+
+| Item | Result |
+|---|---|
+| Run lengths (log clock) | Run 1: 75 s. Run 2: 84 s. Run 3: 40 s |
+| WebView2 | Runs 1 and 2 start `msedgewebview2.exe` (the copy in the game folder) about 44 s and 42 s after the game starts. Run 3 never starts it. The blank window is probably this sign-in browser. Not proven |
+| Did the flag apply? | Unknown. The string `disable-gpu` appears nowhere in the logs, but the browser process reads this variable itself and the log would not show it |
+| Crash dialog | None reported. No Wine "unhandled exception" for the game |
+| Access violations | None at `+0x4f77cb0` or `+0x667BA5`. Runs 1 and 2 have 4 each, at identical addresses: 2 in `ntdll` (a read of address `0x292FD20`), 1 in each of two `tier0_s64` code ranges (Steam's library). The game's own SEH handlers took them and returned "handled" |
+| How the runs end | All three end through the same sequence: `NtQueryInformationProcess` calls with class 7 (debug port) and class 0x1e (debug object handle) on the current process, repeated; then the game's shutdown stubs (`AppPolicyGetProcessTerminationMethod`, `WTSUnRegisterSessionNotification`, `EnumerateTraceGuids`); then the log stops with no normal shutdown lines |
+| Exceptions | `c000001d`: about 657000, 765000 and 284000 |
+
+Meaning: the game now ends by itself, not through a Wine crash. The repeated debug-port and debug-object queries right before the end look like anti-debug or anti-tamper checks. A reasonable hypothesis is that the protection layer detects something in this setup and ends the process. Candidates: the Wine debug channels in use, the FH4-patched `kernelbase.dll` of the bundle (D-015), or Wine itself. Not proven.
+
+A fair test of that: run without any `--debugmsg` channels (a plain launch) and see if the run still ends. Needs Adam's approval. Another test is a launch from the Steam window.
+
+Log files (gitignored): `logs/set9-run1.log` (627 MB), `logs/set9-run2.log` (730 MB), `logs/set9-run3.log` (261 MB).
+
 Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
 
 | Copy | Size | SHA-256 starts | Note |
@@ -365,6 +385,8 @@ Update 05/11/2026 (run set 7): with the native `concrt140.dll`, the `+0x4f77cb0`
 Update 05/11/2026 (run set 8): with the native `concrt140.dll` and the GPU spoof, no access violation in 3 of 3 runs, and two runs reach the Xbox sign-in browser (WebView2). The rating stays "possible" and gets stronger. Open: what the screen shows, and why the processes end.
 
 Update 05/11/2026 (Adam's screen report for set 8): the screen is blank or frozen. With two runs at WebView2, the blank window is probably the Xbox sign-in browser (public reports 4 and 5). Not proven: no screenshot, no process list of the WebView2 children.
+
+Update 05/11/2026 (run set 9): the game runs 40 to 84 s, shows a blank window and then ends through its own shutdown path, after anti-debug style process queries. No Wine crash. The rating stays "possible" but the end state is not understood. Plain launch tests (no debug channels) come next.
 
 Rating: possible.
 
