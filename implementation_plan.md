@@ -69,3 +69,19 @@ Recommendation: A first. B only if A shows that the patched `kernelbase.dll` blo
 ## Stop point
 
 After Phase 4 and the Phase 2 and 3 results, show the summary and wait for approval before any patch work.
+
+## Phase 5: use the third-party proxy code (DRAFT, nothing approved, nothing run)
+
+Source (cloned read-only, without the prebuilt DLL): `xvferxedd/fh5-d3dmetal-fix`, GPL-3.0, about 4650 lines of C. Needs Adam's answers to decisions.md questions 7 and 8 first.
+
+Facts from the source (read only): `memfix.h` replaces `K32GetProcessMemoryInfo` and clamps `PagefileUsage` and `PrivateUsage` (Wine fills them from the task virtual size, about 65 GB there) to the working set and to total RAM. `stride.h` makes D3DMetal's 24-byte descriptors look 32 bytes wide for the game. `unwindguard.h` catches access violations in `RtlVirtualUnwind2`. `d3d12.c` (from Highball) serves timestamp queries and a shader model fallback. Build: `x86_64-w64-mingw32-gcc` is already installed on this Mac.
+
+Steps (each needs Adam's approval before it runs):
+
+1. Record the permission and the licenses: a `NOTICE` file with the origin of every file (Highball, `xvferxedd`, `whyAm-i`), the license route (decisions.md question 8), a copy of the permission in evidence/private/.
+2. Build `d3d12.dll` from source in the scratchpad with the installed mingw compiler. Do not run it. Compare its behavior notes with the README. Do not use the prebuilt binary.
+3. Put the proxy in the game folder (adds one file to the game folder), set a registry override `d3d12` = native for `ForzaHorizon5.exe` (same method as `concrt140`, undo by `reg delete`), point `HB_D3D12_REAL` to the original provider DLL, and use the GPU identity of the third-party report (RTX 4070) on the command line. Check first if the provider file `apd12.dll` is needed in the bottle `system32` (it is a bottle file change).
+4. Test run through Steam with the watcher. Compare with the current loading screen result.
+5. Optional, only if needed: the `ntdll` patch and the Steam detour tools change CrossOver files. Not planned.
+
+Risks: GPL-3.0 code inside an MIT repo (see question 8), a file added to the game folder (remove it to undo), a native override that fails to load (the game then cannot create a device), and a mismatch between this proxy and this CrossOver build (the third party tested Highball CrossOver r28, not this bundle).

@@ -20,7 +20,7 @@
 | D-014 | 05/11/2026 | Adam gave the go to create the GitHub repo `Forza-Horizon-5-for-mac` (public, protect `main`). | Adam, 05/11/2026. Open question 3 must be closed before the first push. |
 | D-015 | 05/11/2026 | The new bottle `Steam forza 5` is accepted for Phase 2 as a clean bottle with a patched Wine core. | Its `kernelbase.dll` is the FH4 patched file (`313a9d07`). The CrossOver bundle holds the same file, so every new bottle gets it. A full stock baseline needs a stock CrossOver install (needs approval). |
 | D-016 | 05/11/2026 | research.md publishes no FH4 repo line numbers, RVAs, function names or key names. | Adam chose "remove them first", 05/11/2026. The FH4 repo has no LICENSE file. |
-| D-017 | 05/11/2026 | Plan A and Plan B for a stock D3DMetal path are written in implementation_plan.md (Phase 2b). Adam approved Plan A ("Approve Plan A") and it was done on 05/11/2026. Plan B is not approved. | Execution of Plan B needs a separate approval. |
+| D-017 | 05/11/2026 | Plan A and Plan B for a stock D3DMetal path are written in implementation_plan.md (Phase 2b). Adam approved Plan A ("Approve Plan A") and it was done on 05/11/2026. Plan B is not approved. | Execution of Plan B needs a separate approval. || D-018 | 05/11/2026 | Adam wants to use the code of the third-party repo `xvferxedd/fh5-d3dmetal-fix` and says that the owner gave permission. Source cloned read-only (no binary) to the session scratchpad, outside this repo. Nothing is copied into this repo yet. Draft plan: implementation_plan.md Phase 5. Licensing questions 7 and 8 are open. | Adam, 05/11/2026. The repo is GPL-3.0. `d3d12.c`, `d3d12.def` and `pe_tools.py` come from Highball (GPL-3.0 per its notice), so the repo owner cannot relicense them. Patch work needs a plan approval. |
 
 ## Open questions
 
@@ -31,3 +31,5 @@
 5. (Closed by D-012) The app-wide `external` D3DMetal folder is 4.0b3 (hand swap). A new bottle uses it too. Do you want a test with stock 3.0 as well? Changing CrossOver files needs approval.
 6. (Plan A closed by D-017) Does Adam approve Plan B (reinstall CrossOver) from implementation_plan.md Phase 2b? It replaces CrossOver files and needs approval.
 - Branch protection needs `gh` after repo creation. You chose: protect main. Wiki and discussions stay as GitHub defaults.
+7. How was the permission given (a written message, an issue comment, a license exception)? Save a copy in evidence/private/ and name the files it covers. It covers only the owner's own files, not the Highball files.
+8. License route for copied code: (a) a `proxy/` folder under GPL-3.0 with per-file notices and attribution, docs stay MIT (recommended, needs no special grant); (b) relicense the whole repo to GPL-3.0; (c) write our own code from the behavior descriptions and keep MIT.
