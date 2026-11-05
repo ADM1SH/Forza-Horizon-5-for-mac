@@ -43,6 +43,7 @@ Updated: 05/11/2026.
 - Ran FH5 three more times with Steam running (run set 4). Crash details from Adam's dialog file are in research.md section 3.
 - Ran FH5 three more times with a GPU spoof on the command line (run set 5). Same crash.
 - Crash-site study with `llvm-objdump` (already installed). Result in research.md section 4.
+- Ran set 10 on my own (plain launch, watcher, window screenshots). The game shows intro videos and a title screen (research.md section 3).
 - Changed nothing in the bottle, CrossOver, Steam, the game folder or the FH4 repo. Only read-only commands ran (find, grep, stat, shasum).
 
 ## 5. Failed attempts
@@ -51,8 +52,8 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Run set 9 is done: the game ends by itself after 40 to 84 s, with a blank window, after anti-debug style queries (research.md section 3).
-2. Next: run set 10, a plain launch without debug channels (task_today.md). Needs Adam's approval.
-3. Open approvals: Steam window launch, permanent GPU spoof (Adam sets it), control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
-4. Undo for the override is in research.md section 4. Rollback of Plan A is in implementation_plan.md Phase 2b step 7.
-5. Local logs in logs/ use about 5 GB. Delete old ones only with Adam's approval.
+1. Run set 10 is done: intro videos in 3 of 3 runs, title screen in 1 run, then the game ends itself after 51 to 84 s (research.md section 3). Rendering works.
+2. Next: run set 11 with `+timestamp,+process,+seh` and the watcher script, and one run where someone presses a key at the title screen (task_today.md). Needs Adam's approval.
+3. Settings that matter: native `concrt140.dll` (registry override, undo in research.md section 4) and the GPU spoof (command line, not permanent).
+4. Open approvals: permanent settings, Steam window launch, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
+5. Local logs in logs/ use about 5.5 GB. The watcher script is in the session scratchpad (not saved in the repo). Delete old logs only with Adam's approval.

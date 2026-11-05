@@ -284,6 +284,23 @@ A fair test of that: run without any `--debugmsg` channels (a plain launch) and 
 
 Log files (gitignored): `logs/set9-run1.log` (627 MB), `logs/set9-run2.log` (730 MB), `logs/set9-run3.log` (261 MB).
 
+### Run set 10 (plain launch, watched and screenshotted)
+
+Run set 10 on 05/11/2026. Approved by Adam: "approve run set 10", run on my own while Adam was away. Plain launch: no `--debugmsg` channels (default Wine output only). Native `concrt140.dll` through the registry override, GPU spoof on the command line, Steam running. A script launched the game 3 times, checked the process every 2 s, listed game windows and captured only the game windows every 6 s (local files in `logs/set10/`, gitignored, not published: they show copyrighted game images). Wrapper exit code 0 in all runs. No macOS crash report was written.
+
+| Item | Result |
+|---|---|
+| Run lengths | Run 1: 51 s. Run 2: 84 s. Run 3: 54 s. The game ended by itself each time (no timeout kill) |
+| Windows seen | A small window (1244 x 604) shows the Forza Horizon 5 key art from about 9 s to about 35 s. Then a full-screen window (3840 x 2160) appears at about 39 s |
+| Run 1 and 3 screens | Full-screen intro videos: Turn 10 Studios, Xbox Game Studios, a car dashboard clip. Last frames seen at 46 s and 47 s. The process ended at 51 s and 54 s |
+| Run 2 screens | The same intro videos at 40 to 61 s, black frames at 68 s and 74 s, then the **Forza Horizon 5 title screen with "START GAME" and "ACCESSIBILITY/SETTINGS"** at 81 s. The process ended at 84 s, about 3 s later |
+| WebView2 | The browser children (`msedgewebview2.exe` from the game folder) start in every run and stay alive while the game runs (snapshots every 20 s) |
+| Crash data | None. No dialog window, no access violation in the earlier debug runs with these settings, no crash report. The plain log has only 2 Steam lines |
+
+Meaning: the Mac stack renders the game. The intro videos play and the title screen draws, so D3DMetal rendering works in this setup. The earlier "blank window" that Adam saw is probably the black frames between intro videos and the title screen, not proven to be WebView2. The game then ends itself within seconds, at 51 to 84 s. Why it ends is unknown. Candidates, all untested: an Xbox or Microsoft sign-in step at the title screen, the protection layer (anti-debug style queries seen in set 9), or a fault that is not logged without debug channels.
+
+Log files (gitignored): `logs/set10-run1.log` to `-run3.log`, `logs/set10/` (window lists, process snapshots, screenshots).
+
 Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
 
 | Copy | Size | SHA-256 starts | Note |
@@ -387,6 +404,8 @@ Update 05/11/2026 (run set 8): with the native `concrt140.dll` and the GPU spoof
 Update 05/11/2026 (Adam's screen report for set 8): the screen is blank or frozen. With two runs at WebView2, the blank window is probably the Xbox sign-in browser (public reports 4 and 5). Not proven: no screenshot, no process list of the WebView2 children.
 
 Update 05/11/2026 (run set 9): the game runs 40 to 84 s, shows a blank window and then ends through its own shutdown path, after anti-debug style process queries. No Wine crash. The rating stays "possible" but the end state is not understood. Plain launch tests (no debug channels) come next.
+
+Update 05/11/2026 (run set 10): screenshots show the intro videos and, in one run, the Forza Horizon 5 title screen. So the game renders on this Mac with the native `concrt140.dll` and the GPU spoof. Rating: "possible", now with rendering evidence. The remaining blocker is that the game ends itself within seconds. Nobody has pressed a key at the title screen yet.
 
 Rating: possible.
 
