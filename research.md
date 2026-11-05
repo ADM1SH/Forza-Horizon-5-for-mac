@@ -129,6 +129,21 @@ Notes:
 
 Log file names (gitignored, local only): `logs/run1-debugmsg.log`, `logs/run2.log`, `logs/run3.log`.
 
+### Run set 2 (D3DMetal selected, extra logging)
+
+Run set 2 on 05/11/2026. Approved by Adam: "Approve". Adam set Graphics to D3DMetal in the CrossOver UI. The only change in `cxbottle.conf` is `CX_GRAPHICS_BACKEND = "d3dmetal"` (SHA-256 now starts `5fddfef4`). Same command as run set 1, with `+d3d12,+dxgi,+module` added. Three runs.
+
+| Item | Result |
+|---|---|
+| Result | Same as run set 1 in 3 of 3 runs: `d3d12.dll` failed to initialize, status `c0000142`. Logs have the same size (469398 bytes). 0 `:seh:` lines |
+| Which `d3d12.dll` loaded | `C:\windows\system32\d3d12.dll`, builtin. Its hash still starts `a6c08e61`. So selecting D3DMetal did not change which file loads |
+| What the init does | During `PROCESS_ATTACH` of `d3d12.dll`, a load of `d3d12_d3dmetal.dll` is tried. The search path is the game folder, `system32`, `system`, `windows`, `.` and `wbem`. Result: status `c0000135` (file not found). Then `PROCESS_DETACH` and the abort |
+| `d3d12_d3dmetal.dll` on disk | No file with that name in `CrossOver.app` or in any bottle |
+| GPTK folder state | `lib64/apple_gptk/wine/x86_64-windows` holds `d3d12.dll` (229888 bytes, changed 03/11/2026, hash `f3038fdc`, the FH4 proxy hash), `apd12.dll` (`32c942ed`), a backup `d3d12.dll.bak_fh4_archive_...` (196608 bytes, `02aa6734`) and `apd12.dll.bak_repo_...`. So the D3DMetal path of this install is modified for FH4 |
+| Unknown | Which code in the `a6c08e61` file asks for `d3d12_d3dmetal.dll`, and where stock CrossOver puts that file. The string is not found as plain ASCII in the file. Not proven |
+
+Log files (gitignored): `logs/set2-run1.log`, `logs/set2-run2.log`, `logs/set2-run3.log`. Config copy: `evidence/private/cxbottle-newbottle-d3dmetal.conf`.
+
 ## 4. Failure class (Phase 3)
 
 Local result (3 of 3 runs, section 3): the game process never starts. Wine aborts at loader init because the builtin `d3d12.dll` fails to initialize (status `c0000142`). This is before any game code and before any exception.

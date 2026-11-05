@@ -46,8 +46,7 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Phase 2 run set 1 (D3DMetal 4.0b3) is done: `d3d12.dll` fails to initialize, status `c0000142`, exit 66, 3 of 3 runs (research.md sections 3 and 4).
-2. Adam sets Graphics to D3DMetal in the CrossOver UI for `Steam forza 5` (it writes `cxbottle.conf`, so he does it). Warning: the GPTK `d3d12.dll` here has the FH4 proxy hash (research.md section 3, side finding). Then ask Adam to approve a rerun.
-3. Ask Adam to approve a control test: any other D3D12 game in the same bottle. It shows if the bottle or FH5 is at fault.
-4. Ask Adam about the stock D3DMetal 3.0 run (D-012) and the Steam UI launch.
-5. Adam decides: a stock CrossOver reinstall (decisions.md, question 6), and an issue to the FH4 owner for a license.
+1. Run set 2 (D3DMetal selected) gave the same failure. `d3d12.dll` looks for `d3d12_d3dmetal.dll`, which does not exist in CrossOver or in any bottle (research.md section 3).
+2. The GPTK folder of this CrossOver install holds the FH4 proxy and backups (research.md section 3). Stock files are probably gone or renamed.
+3. Adam decides: restore a stock CrossOver (decisions.md, question 6). Without it, no clean D3DMetal test is possible. This replaces CrossOver files and needs his approval.
+4. Other approvals still open: control game test, stock D3DMetal 3.0 run (D-012), Steam UI launch, an issue to the FH4 owner for a license.
