@@ -363,6 +363,20 @@ Candidates still open: a failed check at the stage change (intro to title, or ti
 
 Log files (gitignored): `logs/set13-run1.log`, `logs/set13/`.
 
+### Run sets 14 and 15 (launch through Steam)
+
+Run sets 14 and 15 on 05/11/2026. Approved by Adam: "Approve Steam launch". A script shut down Steam in the bottle (no download was running), started it again with the GPU spoof variables, and called `steam.exe -applaunch 1551360` (the same call as the Play button). Native `concrt140.dll` (registry), no debug channels. A watcher recorded game windows and process snapshots.
+
+| Item | Result |
+|---|---|
+| First attempt | The game did not start in 120 s. Steam's console log says: `LaunchApp` moved through `UpdatingAppTicket` to `ShowEula`, then "waiting for user response to ShowEula". Steam shows a game license agreement window and waits. The direct launches in sets 1 to 13 never went through this step |
+| License agreement | Adam read and accepted it himself. The AI did not answer it |
+| After the answer | Steam started the game at 22:31:54 (log time). The game passed the intro, Adam signed in (Xbox sign-in) and the game reached the **"LOADING... PLEASE WAIT"** screen (build `Ver. 688.109`, screenshot by Adam). It is the longest run so far: more than 7 minutes at the time of writing, with the process at about 210% CPU and about 0.7 GB resident memory |
+| Disk | Busy on the internal SSD at 8 to 20 MB/s with 900 to 1300 operations per second while loading. This looks like shader or cache writing. Not proven |
+| Steam game log | Earlier runs: every game exit is logged as "exit code 0" (a clean exit) |
+
+Meaning: going through Steam (agreement accepted, ownership ticket updated) changed the outcome. The game no longer quits after 1 minute. Whether the earlier direct launches quit because they skipped this Steam step is likely but not proven by a controlled test. The loading screen may be a long first-time shader build (see the external report in section 5.7).
+
 Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
 
 | Copy | Size | SHA-256 starts | Note |
@@ -449,6 +463,25 @@ No Heroic, Whisky, Parallels or WineHQ AppDB entry for FH5 was found. Parallels 
 4. Anyone on Mac, Linux ARM or Wine on ARM: Mac reports 1 and 2 stopped at launch. Report 4 reached rendering and then crashed. FEX report 7 stopped at anti-tamper (single report). No Linux ARM success.
 5. Anti-tamper version: unknown. Only the FEX wiki says Arxan. Reports 8 and 9 describe millions of illegal-instruction exceptions inside the EXE, which fits self-modifying protected code. Whether a VEH in a proxy DLL conflicts with it: unknown. The FH4 repo ran a VEH for an FH4 fault. FH5 can differ. Prove it: Phase 2 log shows the first exception, its code and RVA. Do not research evasion (scope).
 
+### 5.7 User-supplied report: a third-party fix repo (GPL-3.0), 05/11/2026
+
+Source: a post that Adam pasted, plus the public README of `github.com/xvferxedd/fh5-d3dmetal-fix`, read as text only. Nothing was downloaded or run. These are claims by a third party. We did not verify them. Confidence: medium (one author, a detailed README, a video the AI did not see).
+
+| Claim in the report | How it compares with our local evidence |
+|---|---|
+| Stack: Highball CrossOver 26.3 r28 (Wine 11.0), Apple GPTK 4.0 beta 3 (D3DMetal), a d3d12 proxy, Steam, Bridgeplay. M5 Air 16 GB, macOS 27, game build 21856128. 50 to 60 fps with MetalFX | Our stack: CrossOver 26.3 (a build with a modified bundle), D3DMetal 4.0b3, no proxy (original `d3d12.dll`), Steam in a bottle. Same game build and the same D3DMetal. Different Wine build |
+| `Fatal Error 0x800705AA` in the intro and free roam: D3DMetal reports 24-byte descriptors, the game expects 32. The proxy fixes it | Public report 4 (section 5.2) names `0x800705aa` after 37 s to 6 min. We have not reached that stage |
+| 2,784 pipelines use dual-source blending that Metal rejects. The proxy rewrites them | Not tested here. Missing or black objects would show in free roam |
+| Crash on the loading-tips screen: `RtlVirtualUnwind2` called with NULL pointers. Fixed by a small `ntdll` patch | Not seen here yet. Our crash at `+0x667BA5` was a null read in the game, a different place |
+| **`memfix`: clamps `K32GetProcessMemoryInfo` to real RAM, on by default** | Fits our `PreCrashReport.xml` from set 11: `MEM_USED` 149 GB against `MEM_LIMIT` 24 GiB. It suggests the game reads its memory use through this API. The third party fixes it in a proxy. We have not tested it |
+| GPU identity RTX 4070 (vendor 4318, device 10118) "avoids the game's GPU checks and endless loading" | We use an Intel Arc A750 identity (vendor 0x8086, device 0x56a1). Not compared in a test |
+| Optional fix for the black "Welcome to XBOX" window: WebView2 in win7 mode with `--disable-gpu` | We saw a window that Adam called blank in set 8 and 9. In the Steam launch, Adam reached the sign-in |
+| "The first start can sit on a black screen for several minutes while shaders build" | Fits the long loading screen in set 14. We have not proven it |
+| Steam Cloud off with no local profile gives "INVALID PROFILE" | Not seen |
+| Not mentioned: `CONCRT140`, the Steam license agreement | Our `concrt140` and Steam-agreement findings are not in their report. Their Wine build may differ |
+
+License: GPL-3.0. This repo is MIT. Do not copy code from it into this repo. Facts and behavior descriptions are fine. Its prebuilt `d3d12.dll` is a binary from a third party: do not download or run it without Adam's approval and a check of the source. The author credits the FH4 repo owner (`whyAm-i`), Highball, a MACxus profile and Bridgeplay.
+
 ## 6. Feasibility rating
 
 Update 05/11/2026: both run sets failed in `d3d12.dll` init, and set 2 shows the FH4 proxy in CrossOver's D3DMetal path as the cause (section 3). This does not change the FH5 rating yet.
@@ -474,6 +507,8 @@ Update 05/11/2026 (run set 11): the game's own `PreCrashReport.xml` shows a memo
 Update 05/11/2026 (run set 12): no new crash report, and Adam saw the title screen for about 3 s in one run. The memory lead from set 11 is weaker. The game quits itself at several points (intro, title). Rating: "possible". The cause of the quit is open.
 
 Update 05/11/2026 (run set 13): the debug log shows a deliberate shutdown (WebView2 teardown, window teardown, exit) after the intro videos, with no network call by the game and no fault. The cause stays open. Rating: "possible".
+
+Update 05/11/2026 (Steam launch and an external report): through Steam (license agreement accepted by Adam, signed in), the game reaches a long "LOADING... PLEASE WAIT" screen instead of quitting after a minute. A third-party report (unverified) describes the same stack working with a d3d12 proxy that fixes descriptor size, blend state, unwind and memory counters, and says a first start can sit for minutes on shader builds. Rating: "possible", now with a partial path to "works".
 
 Rating: possible.
 
