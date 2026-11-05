@@ -326,9 +326,24 @@ Fields of `PreCrashReport.xml` that matter (values copied; IDs left out):
 | GPU seen by the game | `Intel(R) Arc(TM) A750 Graphics` (the spoof reached the game), driver `35.0.15.8180`, bucket `Extreme|60|1080` |
 | OS seen by the game | Windows 11 Pro, `10.0.22000.588`. CPU name `VirtualApple @ 2.50GHz` |
 
-Meaning: the game wrote a "pre crash" report while still in the splash scene, then quit on its own. The report says the memory in use (149 GB) is about six times the memory limit (24 GiB). That is a strong candidate for the cause: the game compares its memory use with its limit, sees a number far over the limit and takes its crash path. Where the 149 GB comes from is unknown. It is probably virtual memory or large reservations (for example GPU heaps or address space that Wine, D3DMetal or the game reserves), not real use. Not proven. The file is overwritten at every launch, so this is the report of the last run only.
+Meaning: the game wrote a "pre crash" report while still in the splash scene, then quit on its own. The report says the memory in use (149 GB) is about six times the memory limit (24 GiB). That is a strong candidate for the cause: the game compares its memory use with its limit, sees a number far over the limit and takes its crash path. Where the 149 GB comes from is unknown. It is probably virtual memory or large reservations (for example GPU heaps or address space that Wine, D3DMetal or the game reserves), not real use. Not proven. The game did not write a new report in set 12 (see below), so the file is not written at every exit. It exists once, from the end of set 11 (likely run 3, the shortest). That makes the memory lead weaker: it is one report, not a pattern.
 
 Log files (gitignored): `logs/set11-run1.log` to `-run3.log` (475 MB, 515 MB, 232 MB), `logs/set11/`.
+
+### Run set 12 (plain launch, Adam at the Mac)
+
+Run set 12 on 05/11/2026. Approved by Adam: "start set 12". Plain launch, native `concrt140.dll` (registry), GPU spoof on the command line, same watcher as set 10. After each run the script copied `PreCrashReport.xml`.
+
+| Item | Result |
+|---|---|
+| Run lengths | 68 s, 49 s, 67 s. Wrapper exit code 0. No timeout kill |
+| `PreCrashReport.xml` | No new file. The three copies are byte-identical to the file from set 11 (`DATE_TIME` 21:25.53, `MEM_USED` 149228900352). So the game quit in set 12 without writing a crash report |
+| What Adam saw | One run showed the title screen for about 3 seconds, then the game ended with no crash report and no dialog. In the third round the game ended during the intro (the Turn 10 studio logo). Adam did not say which run showed the title screen. The watcher frames (6 s steps) show the intro videos in the last captured frames of runs 1 and 3 |
+| Screens (watcher) | Splash window about 35 s, then the full-screen intro videos |
+
+Meaning: the self-ending is not caused only by the memory report. Two of the set 12 runs ended in the intro and one at the title screen after about 3 seconds, all with no report. So the memory count of 149 GB in the one report is not a proven cause. The game quits through its normal exit path at different points (intro, title screen). Timing is 49 to 68 s from the start in plain runs. Still unknown: what asks the game to quit. Candidates: the game's own timeout or check (for example Xbox or account services, a network check), the protection layer, or a missing input or focus event.
+
+Log files (gitignored): `logs/set12/`, `logs/set12-run*.log` (2 lines each, plain launch). Private copies: evidence/private/fh5-PreCrashReport-set12-run1.xml to `-run3.xml`.
 
 Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
 
@@ -437,6 +452,8 @@ Update 05/11/2026 (run set 9): the game runs 40 to 84 s, shows a blank window an
 Update 05/11/2026 (run set 10): screenshots show the intro videos and, in one run, the Forza Horizon 5 title screen. So the game renders on this Mac with the native `concrt140.dll` and the GPU spoof. Rating: "possible", now with rendering evidence. The remaining blocker is that the game ends itself within seconds. Nobody has pressed a key at the title screen yet.
 
 Update 05/11/2026 (run set 11): the game's own `PreCrashReport.xml` shows a memory count of 149 GB against a 24 GiB limit while in the splash scene, and the game quits itself without any Wine error. This is the first concrete reason for the self-ending runs. Rating: "possible", with a named lead: the memory accounting.
+
+Update 05/11/2026 (run set 12): no new crash report, and Adam saw the title screen for about 3 s in one run. The memory lead from set 11 is weaker. The game quits itself at several points (intro, title). Rating: "possible". The cause of the quit is open.
 
 Rating: possible.
 
