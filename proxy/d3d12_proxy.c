@@ -1,11 +1,12 @@
 /*
  * d3d12.dll proxy for Forza Horizon 5. Two jobs:
- *   1. Forward every export to the provider copy apd12.dll (see d3d12.def, no code here).
+ *   1. Export the 12 D3D12 functions as jump thunks into the provider copy apd12.dll. The table
+ *      is filled in DllMain. A missing function gets a stub that returns E_FAIL.
  *   2. Replace one import of the game EXE, KERNEL32!K32GetProcessMemoryInfo, with a hook that
  *      clamps the counters through vmclamp.h.
  *
  * The hook is installed only when the main module has the expected TimeDateStamp and SizeOfImage
- * (CODE_STYLE.md). In any other process the DLL only forwards.
+ * (CODE_STYLE.md). In any other process the DLL only passes calls to the provider.
  *
  * Environment keys (read once at load):
  *   FH5PX_LOG=<path>   append log lines to this file. No key, no log, no file.
@@ -31,6 +32,26 @@ _Static_assert(offsetof(PROCESS_MEMORY_COUNTERS_EX, PrivateUsage) == 72, "Privat
 #define MARGIN_BYTES ((uint64_t)2 << 30)
 
 typedef BOOL (WINAPI *mem_info_fn)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
+
+#define PX_COUNT 12
+static const char *const px_names[PX_COUNT] = {
+    "GetBehaviorValue", "D3D12CreateDevice", "D3D12GetDebugInterface", "D3D12CoreCreateLayeredDevice",
+    "D3D12CoreGetLayeredDeviceSize", "D3D12CoreRegisterLayers", "D3D12CreateRootSignatureDeserializer",
+    "D3D12CreateVersionedRootSignatureDeserializer", "D3D12EnableExperimentalFeatures", "D3D12GetInterface",
+    "D3D12SerializeRootSignature", "D3D12SerializeVersionedRootSignature"
+};
+
+/* Read by the jump thunks below, so it must be a global symbol. */
+void *px_table[PX_COUNT] __attribute__((used));
+
+#define PX_THUNK(name, i) ".globl " #name "\n" #name ":\n\tjmp *px_table+" #i "*8(%rip)\n\t.p2align 4\n"
+__asm__(".text\n\t.p2align 4\n"
+    PX_THUNK(GetBehaviorValue, 0) PX_THUNK(D3D12CreateDevice, 1) PX_THUNK(D3D12GetDebugInterface, 2)
+    PX_THUNK(D3D12CoreCreateLayeredDevice, 3) PX_THUNK(D3D12CoreGetLayeredDeviceSize, 4)
+    PX_THUNK(D3D12CoreRegisterLayers, 5) PX_THUNK(D3D12CreateRootSignatureDeserializer, 6)
+    PX_THUNK(D3D12CreateVersionedRootSignatureDeserializer, 7) PX_THUNK(D3D12EnableExperimentalFeatures, 8)
+    PX_THUNK(D3D12GetInterface, 9) PX_THUNK(D3D12SerializeRootSignature, 10)
+    PX_THUNK(D3D12SerializeVersionedRootSignature, 11));
 
 static mem_info_fn real_fn;
 static int clamp_on = 1;
@@ -95,8 +116,8 @@ static BOOL WINAPI hook_get_mem_info(HANDLE h, PPROCESS_MEMORY_COUNTERS p, DWORD
     v.has_private = cb >= sizeof(PROCESS_MEMORY_COUNTERS_EX);
     if (v.has_private) v.private_usage = ex->PrivateUsage;
 
-    if (n <= 3)
-        px_log("call, cb, private, pagefile:", 4, (uint64_t)n, cb, v.private_usage, v.pagefile_usage);
+    if (n <= 300 || n % 100 == 0)
+        px_log("call, cb, pagefile, working set:", 4, (uint64_t)n, cb, v.pagefile_usage, v.working_set);
     if (!clamp_on) return ok;
 
     changed = vmclamp(&v, phys_ram, MARGIN_BYTES);
@@ -116,6 +137,25 @@ static BOOL WINAPI hook_get_mem_info(HANDLE h, PPROCESS_MEMORY_COUNTERS p, DWORD
  * can move the DLL if its preferred base is taken. Without it the image has no .reloc section.
  */
 static mem_info_fn volatile hook_ptr = hook_get_mem_info;
+
+static long px_fail(void)
+{
+    return (long)0x80004005; /* E_FAIL */
+}
+
+/* Fill px_table from apd12.dll. Return the number of functions found. */
+static int load_provider(void)
+{
+    HMODULE m = LoadLibraryW(L"apd12.dll");
+    int i, found = 0;
+
+    for (i = 0; i < PX_COUNT; i++) {
+        void *p = m ? (void *)GetProcAddress(m, px_names[i]) : NULL;
+        if (p) found++;
+        px_table[i] = p ? p : (void *)px_fail;
+    }
+    return found;
+}
 
 /* Return NULL when the hook is installed, else the reason it was not. */
 static const char *install(void)
@@ -182,6 +222,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)
         DisableThreadLibraryCalls(inst);
         GetEnvironmentVariableA("FH5PX_LOG", log_path, sizeof log_path);
         if (GetEnvironmentVariableA("FH5PX_CLAMP", val, sizeof val) && val[0] == '0') clamp_on = 0;
+        px_log("provider functions found of 12:", 1, (uint64_t)load_provider(), 0, 0, 0);
         why = install();
         if (why) { px_log("refused:", 0, 0, 0, 0, 0); px_log(why, 0, 0, 0, 0, 0); }
         else px_log("installed, clamp on/off, physical RAM:", 2, (uint64_t)clamp_on, phys_ram, 0, 0);
