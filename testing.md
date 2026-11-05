@@ -9,10 +9,10 @@ No code exists yet. These are the research checks.
 
 ## Phase 2
 
-- [ ] Three runs of the same test produce logs in logs/ (gitignored).
-- [ ] Each log gives: last DLL loaded, first exception, exit code, any repeated call.
-- [ ] The three results match. If not, stop and ask.
-- [ ] The real bottle is unchanged: `cxbottle.conf` hash is the same before and after.
+- [x] Three runs of the same test produce logs in logs/ (gitignored). Done 05/11/2026.
+- [x] Each log gives: last DLL loaded, first exception, exit code, any repeated call. Done 05/11/2026.
+- [x] The three results match. Done 05/11/2026.
+- [x] The real bottle is unchanged: `cxbottle.conf` hash starts `9a4bf36d` before and after. Done 05/11/2026.
 
 ## Docs
 

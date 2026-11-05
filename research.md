@@ -111,18 +111,20 @@ Run set 1 on 05/11/2026. Approved by Adam: "Yes, run 4.0b3". Bottle `Steam forza
 | Item | Result |
 |---|---|
 | Exit code | 66, all three runs |
-| Process | The game process never starts. Wine aborts at loader init, about 0.5 s after the process begins |
+| Process | The game EXE never reaches its entry point. The process loads about 20 modules, then Wine aborts in loader init, about 0.5 s after the process begins |
 | Last DLL loaded | `WebView2Loader.dll` (native). Before it: `PartyXboxLive.dll`, `steam_api64.dll` (native), `d3d12.dll` and `dxgi.dll` (builtin, from `system32`) |
 | First error | `err:module:loader_init "d3d12.dll" failed to initialize, aborting` |
 | Second error | `Initializing dlls for ... ForzaHorizon5.exe failed, status c0000142` |
-| Exceptions (`+seh`) | None. The failure is before any game code runs |
-| D3DMetal in the log | No D3DMetal or `apple_gptk` module line appears. Which D3DMetal the bottle loads stays unknown |
+| Exceptions (`+seh`) | 0 `:seh:` lines in all three logs (grep count). The failure is before any game code runs |
+| D3DMetal in the log | No D3DMetal or `apple_gptk` module line appears |
+| Which `d3d12.dll` the bottle has | `system32/d3d12.dll` (92240 bytes) SHA-256 starts `a6c08e61`. This equals the plain Wine builtin `lib/wine/x86_64-windows/d3d12.dll` in CrossOver. It does not equal the GPTK file `lib64/apple_gptk/wine/x86_64-windows/d3d12.dll` (`f3038fdc`). So the bottle runs on plain Wine d3d12, not on D3DMetal. Proven (shasum, 05/11/2026) |
+| Side finding | The GPTK `d3d12.dll` in this CrossOver install has the hash `f3038fdc`, the hash that section 1 matched to the FH4 proxy. So the D3DMetal path in this install holds the FH4 proxy, not a stock file. The older folder `wineold` holds a different file (`bbda1c4e`). If Graphics is set to D3DMetal, the FH4 proxy loads and it expects its provider DLL, which this bottle does not have. Unknown what happens. Not tested |
 | Consistency | Same two error lines and the same log size (10984 bytes) in runs 1, 2 and 3 |
 | Bottle unchanged | `cxbottle.conf` SHA-256 starts `9a4bf36d` before and after |
 
 Notes:
 - A first attempt with a relative file name and `WINEDEBUG` gave no log. CrossOver's `wine` wrapper needs the `--debugmsg` option and a Windows path. These runs are not counted.
-- The `d3d12.dll` in the log is the builtin file. The failure is inside its initialization, not in the game. The cause is unknown. Prove it with a log that adds `+d3d12,+dxgi,+module` (needs Adam's approval to run again).
+- The `d3d12.dll` in the log is the plain Wine builtin (hash above). The failure is inside its initialization, not in the game. The probable cause is that the bottle is not set to D3DMetal (`CX_GRAPHICS_BACKEND` unset). This is not proven. The change is a Graphics setting in the CrossOver UI. It writes `cxbottle.conf`, so Adam must do it himself.
 - The game was not started through Steam (no Steam ownership check ran). Steam was running in the bottle. A launch from the Steam UI is the other Phase 2 test and is not run.
 
 Log file names (gitignored, local only): `logs/run1-debugmsg.log`, `logs/run2.log`, `logs/run3.log`.
@@ -131,7 +133,7 @@ Log file names (gitignored, local only): `logs/run1-debugmsg.log`, `logs/run2.lo
 
 Local result (3 of 3 runs, section 3): the game process never starts. Wine aborts at loader init because the builtin `d3d12.dll` fails to initialize (status `c0000142`). This is before any game code and before any exception.
 
-Class: environment or graphics-backend initialization failure. It is not a game crash and it is not the FH4 launch-loop class. Confidence: high that the failure is in `d3d12.dll` init. Unknown why. The candidates are a D3DMetal backend that does not load in this bottle, or a missing device setting. Both are untested. A +d3d12,+dxgi,+module log is the next evidence.
+Class: environment or graphics-backend initialization failure. It is not a game crash. This bottle cannot test the FH4 launch-loop class: it carries the FH4 patched `kernelbase.dll` (D-015), which would hide that class. Confidence: high that the failure is in `d3d12.dll` init. Unknown why. The candidates are a D3DMetal backend that does not load in this bottle, or a missing device setting. Both are untested. A +d3d12,+dxgi,+module log is the next evidence.
 
 This result is not yet a statement about FH5. A graphics-init failure can hit any D3D12 title in this bottle. A control test with another D3D12 game would show if the bottle itself is at fault. That needs Adam's approval.
 
@@ -209,6 +211,8 @@ No Heroic, Whisky, Parallels or WineHQ AppDB entry for FH5 was found. Parallels 
 
 ## 6. Feasibility rating
 
+Update 05/11/2026: run set 1 failed at the bottle or graphics-backend level (section 3). It does not change the FH5 rating yet.
+
 Rating: possible.
 
 Reasons:
@@ -233,7 +237,7 @@ Each step needs approval from Adam.
 | 2 | Read the EXE import table with a PE tool (needs approval to install `pefile` or `llvm`) | List of imports for appmodel, GameInput, dstorage, WebView2 |
 | 3 | Phase 2: start Steam and FH5, watch 60 seconds, then run the EXE with `WINEDEBUG=+loaddll,+seh,+timestamp,err+all`, three runs | Three logs in logs/ (gitignored). Last DLL, first exception, exit code recorded |
 | 4 | Phase 3: classify the failure | One table row with log lines as proof |
-| 5 | Check which D3DMetal version the bottle loads | `+loaddll` log shows the path |
+| 5 | Check which D3DMetal version the bottle loads | Partly answered 05/11/2026: no D3DMetal module loads, the bottle uses plain Wine d3d12 (section 3). Next: Adam sets Graphics to D3DMetal, then a rerun shows the module path |
 | 0 | Decided (D-011): run Phase 2 in a new clean bottle. Adam creates it in CrossOver, signs in to Steam himself and adds the SSD library folder. Quit the patched `Steam` bottle first so two Steam instances never share the library | Bottle exists. Steam shows FH5 as installed |
 | 6 | Find out who owns the FH4 repo. If it is not Adam, ask the owner for a license (open an issue only with Adam approval) | Written license reply |
 | 7 | If rendering is reached: capture input layouts with a minimal proxy | Offsets table from the census log |

@@ -6,7 +6,8 @@ Status on 05/11/2026: Phase 2 run set 1 is done. `d3d12.dll` fails to initialize
 
 Steps:
 
-1. Ask Adam to approve a diagnostic run: the same command as in research.md section 3, with `+d3d12,+dxgi,+module` added to `--debugmsg`. Keep the log small.
+0. Make sure that Adam has set Graphics to D3DMetal in the CrossOver UI for `Steam forza 5`. Do not edit `cxbottle.conf`. If not done, wait.
+1. Ask Adam to approve a rerun: the same command as in research.md section 3, with `+d3d12,+dxgi,+module` added to `--debugmsg`. Keep the log small.
 2. Run it. Record the lines around the `d3d12.dll` failure in research.md section 3.
 3. Ask Adam to approve a control test with another D3D12 game in the same bottle.
 4. Ask Adam about the stock D3DMetal 3.0 run (D-012). The folder swap needs approval.
