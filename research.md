@@ -215,6 +215,19 @@ Hypothesis (not proven): the segment slot is still a marker, because the segment
 
 Meaning for the rating: the blocker is a runtime library of CrossOver, not the GPU layer. This is the most specific lead so far. It is a candidate bug report for CodeWeavers, after a check that the `concrt140.dll` of this install is not modified (its hash is not compared to a stock install yet).
 
+### Run set 6 (native concrt140 override attempt): invalid test
+
+Run set 6 on 05/11/2026. Approved by Adam: "Approve run set 6". Same command as set 4 plus `WINEDLLOVERRIDES=concrt140=n,b` on the command line. One run done, then I stopped the loop.
+
+| Item | Result |
+|---|---|
+| Crash | Same as set 5: write fault at `ForzaHorizon5.exe+0x4f77cb0`, `rax = 0x1`, write to `0x9`, identical backtrace |
+| Did the override work? | No. The log shows `CONCRT140.dll` loaded as builtin from `system32`, with "got hardcoded default" for the load order, as in set 5 |
+| Why | The Windows environment of a process in the bottle does not contain `WINEDLLOVERRIDES` (test with `cmd /c echo`). The CrossOver wrapper does not pass this variable on, or Wine drops it. Other variables do pass: `D3DM_VENDOR_ID` reached the process and `CX_GRAPHICS_BACKEND` shows `d3dmetal` |
+| Side result | The GPU spoof of set 5 did reach the game, because `D3DM_VENDOR_ID` passes through. So the crash at `+0x4f77cb0` does not depend on the GPU ID. This corrects the "unknown" in the set 5 table |
+
+Meaning: the hypothesis about Wine's `concrt140` is neither confirmed nor rejected. To test it, the override must go through a route that the wrapper accepts: a DLL override in the bottle settings (writes `cxbottle.conf` or the registry, so Adam must do it) or a registry key for the app. Not run.
+
 Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
 
 | Copy | Size | SHA-256 starts | Note |
