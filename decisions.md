@@ -20,6 +20,7 @@
 | D-014 | 05/11/2026 | Adam gave the go to create the GitHub repo `Forza-Horizon-5-for-mac` (public, protect `main`). | Adam, 05/11/2026. Open question 3 must be closed before the first push. |
 | D-015 | 05/11/2026 | The new bottle `Steam forza 5` is accepted for Phase 2 as a clean bottle with a patched Wine core. | Its `kernelbase.dll` is the FH4 patched file (`313a9d07`). The CrossOver bundle holds the same file, so every new bottle gets it. A full stock baseline needs a stock CrossOver install (needs approval). |
 | D-016 | 05/11/2026 | research.md publishes no FH4 repo line numbers, RVAs, function names or key names. | Adam chose "remove them first", 05/11/2026. The FH4 repo has no LICENSE file. |
+| D-017 | 05/11/2026 | Plan A and Plan B for a stock D3DMetal path are written in implementation_plan.md (Phase 2b). Nothing is run. | Adam, 05/11/2026: "Yes, plan it". Execution needs a separate approval. |
 
 ## Open questions
 
@@ -28,5 +29,5 @@
 3. (Closed by D-016) Is it acceptable to publish FH4 repo internals (line numbers, RVAs, key names) in research.md?
 4. Which D3DMetal (4.0b3 or 3.0) does the bottle load?
 5. (Closed by D-012) The app-wide `external` D3DMetal folder is 4.0b3 (hand swap). A new bottle uses it too. Do you want a test with stock 3.0 as well? Changing CrossOver files needs approval.
-6. Does Adam want a stock CrossOver reinstall for a full stock baseline (D-015)? It replaces CrossOver files and needs approval.
+6. Does Adam approve Plan A (restore the GPTK `d3d12.dll`) or Plan B (reinstall CrossOver) from implementation_plan.md Phase 2b? It replaces CrossOver files and needs approval.
 - Branch protection needs `gh` after repo creation. You chose: protect main. Wiki and discussions stay as GitHub defaults.

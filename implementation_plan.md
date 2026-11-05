@@ -23,6 +23,38 @@ Owner of all phases: Adam, with Claude as the research assistant. No other AI ow
 - [ ] Check Steam and CrossOver logs
 - [x] Repeat two more times (same result)
 
+## Phase 2b: stock D3DMetal path (PLAN ONLY, not approved, nothing run)
+
+Why: run set 2 shows that CrossOver loads the FH4 proxy from its GPTK folder (research.md section 3). A clean FH5 test needs the stock file there.
+
+Facts (read only, 05/11/2026), folder `lib64/apple_gptk/wine/x86_64-windows` inside `CrossOver.app`:
+
+| File | Date | Size | SHA-256 starts | Meaning |
+|---|---|---|---|---|
+| `d3d12.dll` | 03/11/2026 | 229888 | `f3038fdc` | FH4 proxy. This is the file that loads |
+| `d3d12.dll.bak_fh4_archive_...` | 17/10/2026 | 196608 | `02aa6734` | Probably the original file. Same date as the stock `d3d10.dll`, `d3d11.dll` and `dxgi.dll`. Not proven |
+| `apd12.dll`, `apd12.so` | 29/10/2026 | 196608 | `32c942ed` | FH4 provider (patched export name). Leave as is |
+| `wineold/` | 15/07/2026 | n/a | n/a | Stock D3DMetal 3.0. Not touched by this plan |
+
+Plan A (smallest change, reversible):
+
+1. Quit Steam and all Wine processes in every bottle. Check with `ps`.
+2. Copy the whole `wine` folder to `~/Backups/crossover-gptk-wine-05112026/` with `cp -Rp`. Save a SHA-256 list next to it. Delete nothing.
+3. Compare the section headers of `d3d12.dll.bak_fh4_archive_...` with `wineold/x86_64-windows/d3d12.dll` and with `d3d11.dll` of the same folder. Stop and ask if the bak file does not look like a D3DMetal 4.0b3 file.
+4. Rename `d3d12.dll` to `d3d12.dll.fh4proxy_05112026`. Copy the bak file to `d3d12.dll`. Do not touch `apd12.*`.
+5. Make sure that the new `d3d12.dll` has the hash `02aa6734`.
+6. Ask Adam before run set 3: same command as set 2, 3 runs, logs in logs/.
+7. Rollback: rename the two files back, or copy from the backup folder.
+
+Effects:
+- Every bottle that uses the D3DMetal backend loads the stock file from now on. The `Steam` bottle (FH4) has its own copy of the proxy in `system32`. Whether FH4 still works is unknown. Test FH4 after the change, or accept the risk.
+- The CrossOver bundle seal is already broken (research.md section 1). A CrossOver update can overwrite the change.
+- `kernelbase.dll` stays patched (D-015). Plan A does not give a full stock baseline.
+
+Plan B (full stock baseline): reinstall CrossOver 26.3 from CodeWeavers. It restores `kernelbase.dll`, the GPTK folder and D3DMetal 3.0 (the 4.0b3 hand swap is lost). It needs a download and a quit of CrossOver. Bottles stay. Needs Adam's approval and a size check first.
+
+Recommendation: A first. B only if A shows that the patched `kernelbase.dll` blocks the test.
+
 ## Phase 3: classify the failure
 
 - [ ] Place the result in one table row with evidence

@@ -6,9 +6,10 @@ Status on 05/11/2026: run sets 1 and 2 both fail at `d3d12.dll` init (research.m
 
 Steps:
 
-1. Ask Adam about decisions.md question 6: a stock CrossOver reinstall or restore of the GPTK folder. It replaces CrossOver files and needs his approval. Name what would be lost: the FH4 setup in the `Steam` bottle would stop working.
-2. If Adam says no, ask about a control test with another D3D12 game in the bottle.
-3. Do not run the game again without approval. Do not edit `cxbottle.conf`.
-4. Stop. Show the summary and wait for approval before any patch work.
+1. Ask Adam to approve Plan A (implementation_plan.md, Phase 2b). Name what changes: one file in `CrossOver.app`, with a full backup first. Nothing is deleted.
+2. If approved, do steps 1 to 5 of Plan A. Then ask before run set 3.
+3. If not approved, ask about Plan B or stop.
+4. Do not run the game again without approval. Do not edit `cxbottle.conf`.
+5. Stop. Show the summary and wait for approval before any patch work.
 
-Check: decisions.md has the answer to question 6.
+Check: implementation_plan.md Phase 2b has ticked steps, or decisions.md has Adam's answer.
