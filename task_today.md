@@ -8,7 +8,7 @@ Status on 05/11/2026: the crash site is in game code right after a call to `_Int
 
 Steps:
 
-1. (Run set 6 failed as a test: the `WINEDLLOVERRIDES` variable does not reach Wine, research.md section 3.) Ask Adam to set a DLL override `concrt140` = native, builtin for the app `ForzaHorizon5.exe` in the CrossOver bottle settings himself (it writes bottle settings). Then ask to approve run set 7 (3 runs, check the log: `CONCRT140.dll` must show `native`).
+1. (Done 05/11/2026: the override `concrt140` = `native,builtin` for `ForzaHorizon5.exe` is set in the bottle registry. See research.md section 4.) Make sure that no `ForzaHorizon5.exe` process runs (an old crash dialog can leave one). Ask Adam to approve run set 7: same command as set 4 but with channels `+loaddll,err+all` only and no log cap. 3 runs. Close dialogs between runs. Check that the log shows `CONCRT140.dll` as `native`. Check disk space first.
 2. Ask Adam about these tests: native Microsoft `concrt140.dll` override in the bottle (legal and file-change check first), a run with Wine debug channels for `concrt`, a control game, the stock D3DMetal 3.0 run, Plan B.
 3. Ask Adam if he wants a bug report for CodeWeavers (he sends it, not the AI). Draft only, no sending.
 4. Stop. Show the summary and wait for approval before any patch work.

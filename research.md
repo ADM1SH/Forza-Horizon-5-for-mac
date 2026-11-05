@@ -228,6 +228,8 @@ Run set 6 on 05/11/2026. Approved by Adam: "Approve run set 6". Same command as 
 
 Meaning: the hypothesis about Wine's `concrt140` is neither confirmed nor rejected. To test it, the override must go through a route that the wrapper accepts: a DLL override in the bottle settings (writes `cxbottle.conf` or the registry, so Adam must do it) or a registry key for the app. Not run.
 
+Change on 05/11/2026 (approved by Adam: "Yes, set it"): a per-app DLL override was added to the bottle registry with `wine reg add`: key `HKCU\Software\Wine\AppDefaults\ForzaHorizon5.exe\DllOverrides`, value `concrt140` = `native,builtin`. `cxbottle.conf` is unchanged (`5fddfef4`). Backup of the bottle registry files: `~/Backups/steam-forza-5-registry-05112026/`. Undo: `wine --bottle "Steam forza 5" reg delete "HKCU\Software\Wine\AppDefaults\ForzaHorizon5.exe\DllOverrides" /v concrt140 /f`, or copy the backup back with Wine stopped. Not yet proven to take effect: the next log must show `CONCRT140.dll` as `native`.
+
 Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
 
 | Copy | Size | SHA-256 starts | Note |
