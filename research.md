@@ -215,6 +215,16 @@ Hypothesis (not proven): the segment slot is still a marker, because the segment
 
 Meaning for the rating: the blocker is a runtime library of CrossOver, not the GPU layer. This is the most specific lead so far. It is a candidate bug report for CodeWeavers, after a check that the `concrt140.dll` of this install is not modified (its hash is not compared to a stock install yet).
 
+Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
+
+| Copy | Size | SHA-256 starts | Note |
+|---|---|---|---|
+| CrossOver bundle `lib/wine/x86_64-windows` (builtin, the one that ran) | 143952 | `31c70170` | No stock copy exists to compare. Adam has none. Stock status stays unknown |
+| New bottle `system32` | 374200 | `54716f07` | Much larger. Imports `MSVCP140.dll` and `VCRUNTIME140_1.dll`. Looks like a Microsoft native DLL (probably from a Visual C++ redistributable that Steam installed). It was not the module that loaded: the crash file shows a `PE-Wine` module of about 0x28000 bytes |
+| Old test bottle `CXPBottles/Steam` (CrossOver 25.1.1) | 324208 | `2405355f` | Same kind of native copy. Not used |
+
+So a native `concrt140.dll` is already inside the new bottle. A DLL override on the command line (`WINEDLLOVERRIDES=concrt140=n,b`) would load it without a file change. Not run yet. Needs Adam's approval.
+
 Earlier results, for the record: sets 1 and 2 failed in `d3d12.dll` init because the FH4 proxy sat in CrossOver's D3DMetal folder. Set 3 exited after about 13 s without a Steam client running. Both are environment effects, not FH5 behavior.
 
 Confidence: high that the class is a game-code runtime crash. Unknown: the root cause. Candidates: a missing GPU device spoof in this bottle (for the read violation, per report 4), a D3DMetal behavior that the game does not expect, or the anti-tamper layer. All untested.
