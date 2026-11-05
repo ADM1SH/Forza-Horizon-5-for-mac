@@ -11,12 +11,13 @@ Updated: 05/11/2026.
 ## 2. Current state
 
 - Docs and rules are written. Git is initialised on branch main. The first commit is made on 05/11/2026. The GitHub repo `ADM1SH/Forza-Horizon-5-for-mac` is created and pushed in the same session (status in section 4).
-- Phase 0, 1 and 4 are done. Phase 2 run set 1 and Phase 3 first result are done (05/11/2026). The game process does not start.
+- Status 06/11/2026 (written at about 02:30 while Adam slept): the game reaches the title screen through Steam in about 100 s with plain CrossOver 26.3 and D3DMetal 4.0b3, also without our proxy (set 18 control run). Nobody has pressed START yet. Free roam, the controller and the `0x800705AA` error are untested. Why sets 14 to 17 were stuck on loading is not known (research.md section 3, set 18).
 - FH5 is fully installed (StateFlags 4, buildid 21856128). It sits in the Steam library folder on the external SSD (`SteamGames`).
 - EXE: `ForzaHorizon5.exe`, 176231056 bytes, SHA-256 `eb71ee4a6ae092b854c58751342c6d06a4d9bc00f089b81e72b073d4867b76b7`.
 - The new bottle `Steam forza 5` exists (D-011). Its facts are in research.md section 1. One Steam runs in it. Its Steam library list shows the SSD folder.
 - Key finding (D-015): the new bottle has no FH4 proxy and no `HB_*` keys. But its `kernelbase.dll` is the FH4 patched file. The CrossOver bundle holds the same file, so every new bottle gets it. It is a clean bottle with a patched Wine core, not a full stock baseline.
 - Decisions of 05/11/2026: stock D3DMetal 3.0 test as a second run (D-012). Adam is not the FH4 repo owner (D-013). GitHub repo go (D-014). FH4 internals removed from research.md (D-016).
+- Our own proxy (`proxy/`, MIT) is built and tested in the bottle (set 18). It loads and hooks `K32GetProcessMemoryInfo` (about 175 calls per second). The memory clamp has no visible effect. Forwarder exports crash the game, so it uses jump thunks (D-020). It is NOT installed now: game folder, registry and `system32` are back to the original state (D-021).
 - Feasibility rating: possible (research.md section 6).
 
 ## 3. Active files
@@ -26,6 +27,7 @@ Updated: 05/11/2026.
 - decisions.md
 - CLAUDE.md (gitignored, local only)
 - evidence/private/cxbottle.conf (gitignored copy, read only)
+- proxy/ (vmclamp.h, vmclamp_test.c, d3d12_proxy.c, d3d12.def, build.sh)
 
 ## 4. Changes made
 
@@ -48,16 +50,19 @@ Updated: 05/11/2026.
 - Ran set 12 (plain, with a copy of PreCrashReport.xml after each run). No new report. Corrected the memory lead in research.md.
 - Ran set 13 (one debug run with file, HTTP and socket channels). Orderly shutdown, no fault.
 - Steam launch (sets 14 and 15): the game waits for a Steam license agreement; Adam accepted. Recorded the loading screen and a third-party report (research.md section 5.7).
+- Phase 5 (05/11/2026 to 06/11/2026): `proxy/` code written and committed in steps. Set 18 ran the proxy in the bottle: run1, run1b (forwarder exports crashed), run1c (thunks, clamp off), run2 (clamp on), run3 control (no proxy). Temporary changes (one DLL in the game folder, one registry value, `apd12.dll` in `system32`) were all removed afterwards.
 - Changed nothing in the bottle, CrossOver, Steam, the game folder or the FH4 repo. Only read-only commands ran (find, grep, stat, shasum).
 
 ## 5. Failed attempts
 
 - None. Some pages did not load for the Phase 4 agents (CodeWeavers compatibility page, Wine bugzilla, ProtonDB body returned 403 or empty). Re-read them in a browser.
+- Forwarder exports in the proxy `.def` (set 18 run1 and run1b): Wine did not find `apd12`, then the game ran the forwarder entry as code. Replaced by jump thunks (D-020).
+- The memory clamp did not change anything visible (set 18 run 1c against run 2).
 
 ## 6. Next steps
 
-1. Steam launch (sets 14 and 15): Adam accepted the license agreement and signed in. The game reached "LOADING... PLEASE WAIT" (Ver. 688.109) and ran more than 7 minutes (research.md section 3). The watcher `logs/set16/` records until it ends or 60 minutes pass. Set 17 (05/11/2026): same Steam launch with the NVIDIA RTX 4070 identity. The identity reached the game, but the load stayed stuck (research.md section 3). Phase 5 step 2 done 05/11/2026 (built, not run): `proxy/d3d12_proxy.c`, `d3d12.def`, `build.sh`; the EXE imports `K32GetProcessMemoryInfo` from KERNEL32, so the hook is an IAT patch. Phase 5 step 1 done 05/11/2026: `proxy/vmclamp.h` and `proxy/vmclamp_test.c`, 11 cases pass (not committed). Third-party repo study: the descriptor stride fix is the first proxy feature to build, the memory clamp is an experiment.
-2. Next: read the end of that run, then decide with Adam about the external proxy repo (section 5.7). No download without approval.
+1. Ask Adam to press START on the title screen and report free roam, the controller and any error. Press nothing in the game without Adam.
+2. Then decide with Adam: find why sets 14 to 17 were stuck on loading (clear the Metal cache, or repeat set 17 with the NVIDIA identity), or fix errors from free roam (implementation_plan.md Phase 5 step 4). No download of third-party binaries without approval.
 3. Settings that matter: native `concrt140.dll` (registry override), the GPU spoof (Steam started with `D3DM_*` variables, not permanent), the Steam license agreement accepted.
 4. Open approvals: permanent settings, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
-5. Local logs in logs/ use about 7 GB. The watcher scripts are in the session scratchpad. Delete old logs only with Adam's approval.
+5. Local logs in logs/ use about 8 GB (set 18 added about 0.2 GB). The watcher script for set 18 is `run18.sh` in the session scratchpad. Delete old logs only with Adam's approval.
