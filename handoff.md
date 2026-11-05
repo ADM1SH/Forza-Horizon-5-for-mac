@@ -42,6 +42,7 @@ Updated: 05/11/2026.
 - Ran FH5 three more times after Plan A (run set 3). Result in research.md section 3.
 - Ran FH5 three more times with Steam running (run set 4). Crash details from Adam's dialog file are in research.md section 3.
 - Ran FH5 three more times with a GPU spoof on the command line (run set 5). Same crash.
+- Crash-site study with `llvm-objdump` (already installed). Result in research.md section 4.
 - Changed nothing in the bottle, CrossOver, Steam, the game folder or the FH4 repo. Only read-only commands ran (find, grep, stat, shasum).
 
 ## 5. Failed attempts
@@ -50,8 +51,8 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Run set 5 is done. The crash at `+0x4f77cb0` repeats in 3 of 3 runs, with a GPU spoof on the command line (research.md section 3).
-2. Next: a read-only study of the crash site (task_today.md). No patch work.
-3. Open approvals: control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner for a license.
+1. Crash-site study is done (research.md section 4). The crash comes from a bad return value of `_Internal_push_back` in CrossOver's `concrt140.dll`. Hypothesis only.
+2. Next: check if that DLL is stock (task_today.md). Then decide on tests with Adam.
+3. Open approvals: native `concrt140.dll` override, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
 4. Rollback of Plan A is in implementation_plan.md Phase 2b step 7.
-5. Local logs in logs/ use about 800 MB. Delete old ones only with Adam's approval.
+5. Local logs in logs/ use about 840 MB. Delete old ones only with Adam's approval.

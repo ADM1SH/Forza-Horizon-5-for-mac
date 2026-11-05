@@ -201,6 +201,20 @@ Log files (gitignored): `logs/set5-run1.log`, `logs/set5-run2.log`, `logs/set5-r
 
 Latest result (run sets 4 and 5, section 3): the game runs and crashes inside its own code with an access violation. Class: runtime crash in game code (not launch failure, not graphics init failure). The main fault is a write at `ForzaHorizon5.exe+0x4f77cb0` (5 of 6 runs, same backtrace). One run hit a read at `+0x667BA5` first, which matches public report 4 in section 5.2.
 
+Crash-site study (read only, 05/11/2026, `llvm-objdump` already on the Mac, no install). Addresses are RVAs unless marked. No game bytes are published.
+
+| Step | Fact |
+|---|---|
+| Crash instruction | `ForzaHorizon5.exe+0x4f77cb0` stores a register at offset 8 of the pointer in `rax`. The line before it is a call through the import slot for `Concurrency::details::_Concurrent_vector_base_v4::_Internal_push_back` in `CONCRT140.dll` (element size 0x10, index out-parameter). So `rax` is the element pointer that the vector function returned |
+| Frames above it | `+0x4f78697`, `+0x4f7cca2`, `+0x4f97875`, `+0x4b75cb2`, `+0x947676` and the thread entry `+0x5869b38`. All in `.text`. Not studied further |
+| Which `concrt140` ran | The builtin (Wine) `concrt140.dll` of CrossOver (`lib/wine/x86_64-windows/concrt140.dll`). The module list in the crash file shows it as `PE-Wine` |
+| What Wine's function returns | The pointer is `segment_table[segment] + index_in_segment * element_size`, read from the vector object. `_Internal_reserve` runs first to make the segment |
+| Match with the dumps | Run 2: `rax = 0x11`, run 3: `rax = 0x1`. Both fit `1 + n * 16`. So the segment table entry holds the value 1, not a pointer, and the returned "pointer" is that 1 plus an offset. A value of 1 is a small marker, not memory |
+
+Hypothesis (not proven): the segment slot is still a marker, because the segment is not allocated yet when this thread reads it. This looks like a race between threads that grow the same concurrent vector, or a gap in the Wine implementation of `_Internal_reserve`. It would explain why the fault value changes per run and why the GPU spoof had no effect. Test to prove it: a Wine build with a fixed or different `concrt140`, or Microsoft's `concrt140.dll` as a native override in the bottle (not run, needs approval and a legal check of the source). Another test: a Wine debug channel for `concrt` if one exists.
+
+Meaning for the rating: the blocker is a runtime library of CrossOver, not the GPU layer. This is the most specific lead so far. It is a candidate bug report for CodeWeavers, after a check that the `concrt140.dll` of this install is not modified (its hash is not compared to a stock install yet).
+
 Earlier results, for the record: sets 1 and 2 failed in `d3d12.dll` init because the FH4 proxy sat in CrossOver's D3DMetal folder. Set 3 exited after about 13 s without a Steam client running. Both are environment effects, not FH5 behavior.
 
 Confidence: high that the class is a game-code runtime crash. Unknown: the root cause. Candidates: a missing GPU device spoof in this bottle (for the read violation, per report 4), a D3DMetal behavior that the game does not expect, or the anti-tamper layer. All untested.
