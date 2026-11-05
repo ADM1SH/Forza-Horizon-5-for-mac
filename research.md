@@ -128,6 +128,8 @@ Notes:
 
 Log file names (gitignored, local only): `logs/run1-debugmsg.log`, `logs/run2.log`, `logs/run3.log`.
 
+Change on 05/11/2026 (Plan A, approved by Adam): in `lib64/apple_gptk/wine/x86_64-windows` the FH4 proxy `d3d12.dll` was renamed to `d3d12.dll.fh4proxy_05112026`. The original (hash `02aa6734`) was copied in as `d3d12.dll`. A backup of the folder is in `~/Backups/crossover-gptk-wine-05112026/`. Run sets 1 and 2 below ran before this change.
+
 ### Run set 2 (D3DMetal selected, extra logging)
 
 Run set 2 on 05/11/2026. Approved by Adam: "Approve". Adam set Graphics to D3DMetal in the CrossOver UI. The only change in `cxbottle.conf` is `CX_GRAPHICS_BACKEND = "d3dmetal"` (SHA-256 now starts `5fddfef4`). Same command as run set 1, with `+d3d12,+dxgi,+module` added. Three runs.

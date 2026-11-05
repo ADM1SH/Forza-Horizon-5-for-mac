@@ -1,15 +1,14 @@
 # Task for the next session
 
-Get Adam's approval, then run the diagnostic. Do not change game, bottle or CrossOver files.
+Ask Adam before run set 3. Do not edit `cxbottle.conf`.
 
-Status on 05/11/2026: run sets 1 and 2 both fail at `d3d12.dll` init (research.md section 3). No run is pending.
+Status on 05/11/2026: Plan A is done. The GPTK `d3d12.dll` is the original again (hash starts `02aa6734`). No game run happened since. Rollback is in implementation_plan.md Phase 2b step 7.
 
 Steps:
 
-1. Ask Adam to approve Plan A (implementation_plan.md, Phase 2b). Name what changes: one file in `CrossOver.app`, with a full backup first. Nothing is deleted.
-2. If approved, do steps 1 to 5 of Plan A. Then ask before run set 3.
-3. If not approved, ask about Plan B or stop.
-4. Do not run the game again without approval. Do not edit `cxbottle.conf`.
-5. Stop. Show the summary and wait for approval before any patch work.
+1. Make sure that no Wine process runs and that Adam started no bottle. Ask Adam to approve run set 3: the same command as run set 2 (research.md section 3), 3 runs, logs in logs/ (gitignored).
+2. Run it. Record the result in research.md section 3. Check the section headers of the loaded `d3d12.dll` against the file hashes.
+3. Ask Adam before a launch from the Steam window, a control game test, the stock D3DMetal 3.0 run, or Plan B.
+4. Stop. Show the summary and wait for approval before any patch work.
 
-Check: implementation_plan.md Phase 2b has ticked steps, or decisions.md has Adam's answer.
+Check: research.md section 3 has the run set 3 result.

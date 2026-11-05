@@ -23,7 +23,7 @@ Owner of all phases: Adam, with Claude as the research assistant. No other AI ow
 - [ ] Check Steam and CrossOver logs
 - [x] Repeat two more times (same result)
 
-## Phase 2b: stock D3DMetal path (PLAN ONLY, not approved, nothing run)
+## Phase 2b: stock D3DMetal path (Plan A approved by Adam and done on 05/11/2026, steps 1 to 5)
 
 Why: run set 2 shows that CrossOver loads the FH4 proxy from its GPTK folder (research.md section 3). A clean FH5 test needs the stock file there.
 
@@ -45,6 +45,8 @@ Plan A (smallest change, reversible):
 5. Make sure that the new `d3d12.dll` has the hash `02aa6734`.
 6. Ask Adam before run set 3: same command as set 2, 3 runs, logs in logs/.
 7. Rollback: rename the two files back, or copy from the backup folder.
+
+Done on 05/11/2026: step 1 (no Wine process left), step 2 (backup in `~/Backups/crossover-gptk-wine-05112026/`, 10 files, hashes identical), step 3 (the bak file has the same PE timestamp and section layout as the stock `d3d11.dll` and `dxgi.dll`; the proxy has a different build), step 4 (rename and copy), step 5 (`d3d12.dll` hash starts `02aa6734`). Step 6 waits for Adam.
 
 Effects:
 - Every bottle that uses the D3DMetal backend loads the stock file from now on. The `Steam` bottle (FH4) has its own copy of the proxy in `system32`. Whether FH4 still works is unknown. Test FH4 after the change, or accept the risk.

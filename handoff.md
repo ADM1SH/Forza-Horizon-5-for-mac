@@ -38,6 +38,7 @@ Updated: 05/11/2026.
 - Ticked the finished boxes in implementation_plan.md and testing.md. Made the first commit.
 - Created the public repo https://github.com/ADM1SH/Forza-Horizon-5-for-mac and pushed `main` (05/11/2026). Protection on `main`: no force push, no deletion. No required reviews and admins are not enforced, so small direct commits still work.
 - Ran FH5 three times under Wine with debug logs (Adam approved). Logs are in logs/ (gitignored). The result is in research.md sections 3 and 4.
+- Plan A: restored the original GPTK `d3d12.dll` in CrossOver (backup first). Details in implementation_plan.md Phase 2b.
 - Changed nothing in the bottle, CrossOver, Steam, the game folder or the FH4 repo. Only read-only commands ran (find, grep, stat, shasum).
 
 ## 5. Failed attempts
@@ -46,7 +47,7 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Run set 2 (D3DMetal selected) failed the same way. CrossOver loaded the FH4 proxy from its GPTK folder (proven by section headers). The proxy looks for `d3d12_d3dmetal.dll`, which does not exist (research.md section 3).
-2. The GPTK folder holds the proxy and a backup of the original (`d3d12.dll.bak_fh4_archive_...`). A restore is possible: backup first, never delete.
-3. Adam decides: restore a stock CrossOver (decisions.md, question 6). Without it, no clean D3DMetal test is possible. This replaces CrossOver files and needs his approval.
-4. Other approvals still open: control game test, stock D3DMetal 3.0 run (D-012), Steam UI launch, an issue to the FH4 owner for a license.
+1. Plan A is done (implementation_plan.md Phase 2b, 05/11/2026). Backup: `~/Backups/crossover-gptk-wine-05112026/`. Rollback: rename `d3d12.dll.fh4proxy_05112026` back to `d3d12.dll`.
+2. Ask Adam to approve run set 3 (task_today.md).
+3. Check if FH4 in the `Steam` bottle still works. Only Adam can test it.
+4. Open approvals: control game test, Steam window launch, stock D3DMetal 3.0 run, Plan B, an issue to the FH4 owner for a license.
