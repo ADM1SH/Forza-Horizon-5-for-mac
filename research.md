@@ -187,19 +187,19 @@ Run set 5 on 05/11/2026. Approved by Adam: "Approve run set 5". Same command as 
 
 | Item | Result |
 |---|---|
-| Result | Same crash in 3 of 3 runs: access violation at `ForzaHorizon5.exe+0x4f77cb0`, instruction `movq %r15, 8(%rax)`. Backtrace frames are identical to set 4 crash 1 (9 frames, all in the EXE except the two thread-start frames) |
-| Fault details | Run 2: write to `0x19`, `rax = 0x11`. Run 3: write to `0x9`, `rax = 0x1`. Run 1: same address in the log (dialog text not saved). So `rax` is a small number that changes per run. The pointer is bad or null plus an offset |
+| Result | Runs 1 and 2: access violation at `ForzaHorizon5.exe+0x4f77cb0`, instruction `movq %r15, 8(%rax)`. The backtrace is identical to set 4 crash 1. Run 3: no access violation. The game passed that point, loaded the WebView2 files (`msedge.dll`, `msedgewebview2.exe`) and Adam saw the start screen. The run ended with no crash dialog because the log cap of the test command (`head -c 400000000`) was reached and closed the pipe. The log is exactly 400000000 bytes. So the end of run 3 is my test setup, not a game crash |
+| Fault details | One dialog: write to `0x19`, `rax = 0x11`. Another dialog: write to `0x9`, `rax = 0x1`. So `rax` is a small number that changes per run. The pointer is bad or null plus an offset. Which dialog file belongs to which run is not certain |
 | `+0x667BA5` crash | Not seen in set 5 (it showed once in set 4 run 3) |
-| Did the spoof reach the game? | Unknown. The logs do not show the variables. If it did, the crash at `+0x4f77cb0` does not depend on the GPU ID |
+| Did the spoof reach the game? | Yes. `D3DM_VENDOR_ID` reaches a process in the bottle (test in set 6). So the crash at `+0x4f77cb0` does not depend on the GPU ID |
 | Dialog texts | From Adam, saved in evidence/private/ (gitignored) |
 
-Meaning: crash 1 repeats in 5 of 6 runs of sets 4 and 5 with the same code path. It is a stable game-code fault in this stack. The root cause is unknown. A GPU device spoof is not the fix for it (if the spoof reached the game). No patch work is in scope yet.
+Meaning: crash 1 repeats in 4 of 6 runs of sets 4 and 5 with the same code path, and run 3 of set 5 passed it. So the fault is not deterministic. That fits a race (hypothesis in section 4) and is the first run that got past it. The root cause is unknown. A GPU device spoof is not the fix for it. No patch work is in scope yet.
 
 Log files (gitignored): `logs/set5-run1.log`, `logs/set5-run2.log`, `logs/set5-run3.log`.
 
 ## 4. Failure class (Phase 3)
 
-Latest result (run sets 4 and 5, section 3): the game runs and crashes inside its own code with an access violation. Class: runtime crash in game code (not launch failure, not graphics init failure). The main fault is a write at `ForzaHorizon5.exe+0x4f77cb0` (5 of 6 runs, same backtrace). One run hit a read at `+0x667BA5` first, which matches public report 4 in section 5.2.
+Latest result (run sets 4 and 5, section 3): the game runs and crashes inside its own code with an access violation. Class: runtime crash in game code (not launch failure, not graphics init failure). The main fault is a write at `ForzaHorizon5.exe+0x4f77cb0` (5 of 7 runs in sets 4 to 6, same backtrace; 1 run first hit the read at `+0x667BA5`; 1 run had no access violation and reached the start screen). One run hit a read at `+0x667BA5` first, which matches public report 4 in section 5.2.
 
 Crash-site study (read only, 05/11/2026, `llvm-objdump` already on the Mac, no install). Addresses are RVAs unless marked. No game bytes are published.
 
@@ -322,7 +322,7 @@ Update 05/11/2026 (run set 3): with the original `d3d12.dll`, FH5 starts and run
 
 Update 05/11/2026 (run set 4): with Steam running, FH5 runs into game code and crashes there. Rating stays "possible", but the crash is not explained yet. The reports 1 and 2 of section 5.1 said that launch fails. Here launch works and the failure moves to a game-code crash.
 
-Update 05/11/2026 (run set 5): the same game-code crash at `+0x4f77cb0` repeated in 3 of 3 runs with a GPU spoof on the command line. The rating stays "possible". The crash is stable, so a root-cause study is the next research step (no patch yet).
+Update 05/11/2026 (run set 5): the game-code crash at `+0x4f77cb0` happened in 2 of 3 runs with a GPU spoof on the command line. Run 3 passed it and reached the start screen (WebView2 loaded). The rating moves toward "possible" with more confidence: the game can run past the fault. No patch work.
 
 Rating: possible.
 

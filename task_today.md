@@ -2,6 +2,8 @@
 
 Do not edit `cxbottle.conf`. Ask Adam before every run or file change.
 
+Log rule: never cap a log with `head -c` on a pipe. The cap closes the pipe and kills the game (this ended set 5 run 3 at the start screen). Use lighter channels (`+loaddll,err+all`, no `+seh`) and no cap, and check disk space.
+
 Status on 05/11/2026: the crash site is in game code right after a call to `_Internal_push_back` of `concrt140.dll` (CrossOver builtin). The returned pointer is a small marker value (research.md section 4). Hypothesis: a segment allocation race or gap in Wine's concurrent_vector.
 
 Steps:

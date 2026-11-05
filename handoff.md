@@ -51,7 +51,7 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Crash-site study is done (research.md section 4). The crash comes from a bad return value of `_Internal_push_back` in CrossOver's `concrt140.dll`. Hypothesis only.
+1. Crash-site study is done (research.md section 4). The crash comes from a bad return value of `_Internal_push_back` in CrossOver's `concrt140.dll`. Hypothesis only. One run passed the crash site, so it is not deterministic.
 2. Next: check if that DLL is stock (task_today.md). Then decide on tests with Adam.
 3. Open approvals: native `concrt140.dll` override, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
 4. Rollback of Plan A is in implementation_plan.md Phase 2b step 7.
