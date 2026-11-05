@@ -39,6 +39,7 @@ Updated: 05/11/2026.
 - Created the public repo https://github.com/ADM1SH/Forza-Horizon-5-for-mac and pushed `main` (05/11/2026). Protection on `main`: no force push, no deletion. No required reviews and admins are not enforced, so small direct commits still work.
 - Ran FH5 three times under Wine with debug logs (Adam approved). Logs are in logs/ (gitignored). The result is in research.md sections 3 and 4.
 - Plan A: restored the original GPTK `d3d12.dll` in CrossOver (backup first). Details in implementation_plan.md Phase 2b.
+- Ran FH5 three more times after Plan A (run set 3). Result in research.md section 3.
 - Changed nothing in the bottle, CrossOver, Steam, the game folder or the FH4 repo. Only read-only commands ran (find, grep, stat, shasum).
 
 ## 5. Failed attempts
@@ -47,7 +48,8 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Plan A is done (implementation_plan.md Phase 2b, 05/11/2026). Backup: `~/Backups/crossover-gptk-wine-05112026/`. Rollback: rename `d3d12.dll.fh4proxy_05112026` back to `d3d12.dll`.
-2. Ask Adam to approve run set 3 (task_today.md).
-3. Check if FH4 in the `Steam` bottle still works. Only Adam can test it.
-4. Open approvals: control game test, Steam window launch, stock D3DMetal 3.0 run, Plan B, an issue to the FH4 owner for a license.
+1. Run set 3 is done: FH5 starts and exits after about 13 s (research.md section 3). Cause unknown. Steam was not running in the bottle.
+2. Next: Adam starts Steam in the bottle. Ask Adam to approve run set 4 (task_today.md).
+3. Then a Steam window launch that Adam watches.
+4. Open approvals: control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner for a license.
+5. Rollback of Plan A is in implementation_plan.md Phase 2b step 7.

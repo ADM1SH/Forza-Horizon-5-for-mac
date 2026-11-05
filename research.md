@@ -145,6 +145,23 @@ Run set 2 on 05/11/2026. Approved by Adam: "Approve". Adam set Graphics to D3DMe
 
 Log files (gitignored): `logs/set2-run1.log`, `logs/set2-run2.log`, `logs/set2-run3.log`. Config copy: `evidence/private/cxbottle-newbottle-d3dmetal.conf`.
 
+### Run set 3 (original GPTK `d3d12.dll` restored)
+
+Run set 3 on 05/11/2026, after Plan A (implementation_plan.md Phase 2b). Approved by Adam: "Approve run set 3". Same command as set 2. Three runs. Steam was not running in the bottle (Adam had quit it for Plan A). `cxbottle.conf` unchanged (`5fddfef4`).
+
+| Item | Result |
+|---|---|
+| Result | Different from sets 1 and 2. The EXE starts and runs about 13 s in each run (run 1: 26316.8 to 26330.3 s of the log clock; run 2 and 3: the same span). Then the process shuts down by itself (`LdrShutdownProcess`). No Wine crash |
+| `d3d12.dll` | Loaded `d3d12.dll`, `dxgi.dll` and `d3d12core.dll` (builtin). The `d3d12.dll` section headers (`.text` file offset 0x1000, size 0x2000, virt 0x1eb6) match the restored original, not the proxy. So the D3DMetal path loads. Proven (log section lines) |
+| Exceptions | Illegal instruction `c000001d`: 41314, 41232 and 41232 in the three logs (grep count of `code=c000001d`). A handler inside the EXE (vectored handler near `0x145715998`) returns "continue". `c0000001`: 0. Exception addresses cluster in the EXE image (`0x14...`). This matches the public reports of millions of `0xC000001D` exceptions (section 5.3) |
+| Last events | `steamclient64.dll` (native, from the bottle Steam folder) loads at 26325.9 and unloads about 0.07 s later. The process shuts down about 0.3 s after that |
+| Consistency | Same start-to-end span, same exception counts (within 0.2%) and same ending in 3 of 3 runs |
+| Not captured | The exit code (my pipe returned the status of `head`). A window and the screen output. I did not watch the screen |
+
+Probable cause of the exit: unproven. The game loads the Steam client library at the end and then quits. Steam was not running in the bottle. A Steam API start failure is a candidate. Another candidate is the anti-tamper layer. To tell them apart: run with Steam started by Adam in the bottle (D-011), or launch from the Steam window.
+
+Log files (gitignored): `logs/set3-run1.log`, `logs/set3-run2.log`, `logs/set3-run3.log`.
+
 ## 4. Failure class (Phase 3)
 
 Local result (3 of 3 runs, section 3): the game process never starts. Wine aborts at loader init because the builtin `d3d12.dll` fails to initialize (status `c0000142`). This is before any game code and before any exception.
@@ -228,6 +245,8 @@ No Heroic, Whisky, Parallels or WineHQ AppDB entry for FH5 was found. Parallels 
 ## 6. Feasibility rating
 
 Update 05/11/2026: both run sets failed in `d3d12.dll` init, and set 2 shows the FH4 proxy in CrossOver's D3DMetal path as the cause (section 3). This does not change the FH5 rating yet.
+
+Update 05/11/2026 (run set 3): with the original `d3d12.dll`, FH5 starts and runs about 13 s, then exits. The rating stays "possible". Evidence for it is better now: the D3DMetal path loads and the game runs past `d3d12.dll` init. No rendering or window evidence yet.
 
 Rating: possible.
 
