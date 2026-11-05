@@ -377,6 +377,20 @@ Run sets 14 and 15 on 05/11/2026. Approved by Adam: "Approve Steam launch". A sc
 
 Meaning: going through Steam (agreement accepted, ownership ticket updated) changed the outcome. The game no longer quits after 1 minute. Whether the earlier direct launches quit because they skipped this Steam step is likely but not proven by a controlled test. The loading screen may be a long first-time shader build (see the external report in section 5.7).
 
+### Run set 17 (Steam launch with an NVIDIA identity)
+
+Run set 17 on 05/11/2026. Approved by Adam: "Approve test". The script stopped the bottle processes and started Steam again. The only change from set 16 is the GPU identity: `D3DM_VENDOR_ID=4318`, `D3DM_DEVICE_ID=10118`, description `NVIDIA GeForce RTX 4070` (from the third-party report in section 5.7). Set 16 used the Intel Arc identity.
+
+| Item | Result |
+|---|---|
+| Did the identity reach the game? | Yes. The game's own `PreCrashReport.xml` lists `NVIDIA GeForce RTX 4070` as GPU 0 |
+| FH302 driver warning | Appeared. Adam clicked Ignore Warning |
+| Result | Same as set 16. The game stayed on "LOADING... PLEASE WAIT". Adam says the spinner is frozen |
+| Process state | Alive at 15:24, CPU about 208 percent, working set 686 MB (908 MB at 3:38) |
+| Memory counters | `PreCrashReport.xml` (written once, 22:57) shows `MEM_USED` 151 GB against `MEM_LIMIT` 24 GiB. Same mismatch as before |
+
+Meaning: the identity is not the cause of the stuck load in this setup. The memory mismatch and the load stall stay open. No run has tested the controller yet.
+
 Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
 
 | Copy | Size | SHA-256 starts | Note |
