@@ -46,7 +46,7 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Run set 2 (D3DMetal selected) gave the same failure. `d3d12.dll` looks for `d3d12_d3dmetal.dll`, which does not exist in CrossOver or in any bottle (research.md section 3).
-2. The GPTK folder of this CrossOver install holds the FH4 proxy and backups (research.md section 3). Stock files are probably gone or renamed.
+1. Run set 2 (D3DMetal selected) failed the same way. CrossOver loaded the FH4 proxy from its GPTK folder (proven by section headers). The proxy looks for `d3d12_d3dmetal.dll`, which does not exist (research.md section 3).
+2. The GPTK folder holds the proxy and a backup of the original (`d3d12.dll.bak_fh4_archive_...`). A restore is possible: backup first, never delete.
 3. Adam decides: restore a stock CrossOver (decisions.md, question 6). Without it, no clean D3DMetal test is possible. This replaces CrossOver files and needs his approval.
 4. Other approvals still open: control game test, stock D3DMetal 3.0 run (D-012), Steam UI launch, an issue to the FH4 owner for a license.

@@ -117,14 +117,13 @@ Run set 1 on 05/11/2026. Approved by Adam: "Yes, run 4.0b3". Bottle `Steam forza
 | Second error | `Initializing dlls for ... ForzaHorizon5.exe failed, status c0000142` |
 | Exceptions (`+seh`) | 0 `:seh:` lines in all three logs (grep count). The failure is before any game code runs |
 | D3DMetal in the log | No D3DMetal or `apple_gptk` module line appears |
-| Which `d3d12.dll` the bottle has | `system32/d3d12.dll` (92240 bytes) SHA-256 starts `a6c08e61`. This equals the plain Wine builtin `lib/wine/x86_64-windows/d3d12.dll` in CrossOver. It does not equal the GPTK file `lib64/apple_gptk/wine/x86_64-windows/d3d12.dll` (`f3038fdc`). So the bottle runs on plain Wine d3d12, not on D3DMetal. Proven (shasum, 05/11/2026) |
-| Side finding | The GPTK `d3d12.dll` in this CrossOver install has the hash `f3038fdc`, the hash that section 1 matched to the FH4 proxy. So the D3DMetal path in this install holds the FH4 proxy, not a stock file. The older folder `wineold` holds a different file (`bbda1c4e`). If Graphics is set to D3DMetal, the FH4 proxy loads and it expects its provider DLL, which this bottle does not have. Unknown what happens. Not tested |
+| `system32/d3d12.dll` on disk in the bottle | 92240 bytes, SHA-256 starts `a6c08e61`. Same as the plain Wine file `lib/wine/x86_64-windows/d3d12.dll` in CrossOver. Wine names every builtin `C:@@windows@@system32@@<name>` in the log, so this file hash does not show which file ran. Run set 1 has no section data, so which `d3d12.dll` ran in set 1 is unknown |
 | Consistency | Same two error lines and the same log size (10984 bytes) in runs 1, 2 and 3 |
 | Bottle unchanged | `cxbottle.conf` SHA-256 starts `9a4bf36d` before and after |
 
 Notes:
 - A first attempt with a relative file name and `WINEDEBUG` gave no log. CrossOver's `wine` wrapper needs the `--debugmsg` option and a Windows path. These runs are not counted.
-- The `d3d12.dll` in the log is the plain Wine builtin (hash above). The failure is inside its initialization, not in the game. The probable cause is that the bottle is not set to D3DMetal (`CX_GRAPHICS_BACKEND` unset). This is not proven. The change is a Graphics setting in the CrossOver UI. It writes `cxbottle.conf`, so Adam must do it himself.
+- The failure is inside `d3d12.dll` initialization, not in the game. Run set 2 explains it (below). Whether set 1 failed for the same reason is unknown.
 - The game was not started through Steam (no Steam ownership check ran). Steam was running in the bottle. A launch from the Steam UI is the other Phase 2 test and is not run.
 
 Log file names (gitignored, local only): `logs/run1-debugmsg.log`, `logs/run2.log`, `logs/run3.log`.
@@ -136,11 +135,11 @@ Run set 2 on 05/11/2026. Approved by Adam: "Approve". Adam set Graphics to D3DMe
 | Item | Result |
 |---|---|
 | Result | Same as run set 1 in 3 of 3 runs: `d3d12.dll` failed to initialize, status `c0000142`. Logs have the same size (469398 bytes). 0 `:seh:` lines |
-| Which `d3d12.dll` loaded | `C:\windows\system32\d3d12.dll`, builtin. Its hash still starts `a6c08e61`. So selecting D3DMetal did not change which file loads |
-| What the init does | During `PROCESS_ATTACH` of `d3d12.dll`, a load of `d3d12_d3dmetal.dll` is tried. The search path is the game folder, `system32`, `system`, `windows`, `.` and `wbem`. Result: status `c0000135` (file not found). Then `PROCESS_DETACH` and the abort |
+| Which `d3d12.dll` loaded | The log names `C:\windows\system32\d3d12.dll`, builtin. The section headers in the log (`.text` file offset 0x400, size 0x1d400; `.data` virtual size 0x488fa78) match only `lib64/apple_gptk/wine/x86_64-windows/d3d12.dll` (229888 bytes, hash `f3038fdc`, the FH4 proxy hash). They do not match the plain Wine file (`.text` size 0x2200). So with D3DMetal selected, CrossOver loads the FH4 proxy from its own GPTK folder. Proven (section header comparison, read only) |
+| What the init does | During `PROCESS_ATTACH` of the proxy, a load of `d3d12_d3dmetal.dll` is tried. This is the fallback name that section 2.2 describes for an unset provider variable. This bottle has no `HB_*` keys. The search path is the game folder, `system32`, `system`, `windows`, `.` and `wbem`. Result: status `c0000135` (file not found). Then `PROCESS_DETACH` and the abort |
 | `d3d12_d3dmetal.dll` on disk | No file with that name in `CrossOver.app` or in any bottle |
-| GPTK folder state | `lib64/apple_gptk/wine/x86_64-windows` holds `d3d12.dll` (229888 bytes, changed 03/11/2026, hash `f3038fdc`, the FH4 proxy hash), `apd12.dll` (`32c942ed`), a backup `d3d12.dll.bak_fh4_archive_...` (196608 bytes, `02aa6734`) and `apd12.dll.bak_repo_...`. So the D3DMetal path of this install is modified for FH4 |
-| Unknown | Which code in the `a6c08e61` file asks for `d3d12_d3dmetal.dll`, and where stock CrossOver puts that file. The string is not found as plain ASCII in the file. Not proven |
+| GPTK folder state | `lib64/apple_gptk/wine/x86_64-windows` holds `d3d12.dll` (229888 bytes, changed 03/11/2026, hash `f3038fdc`, the FH4 proxy hash), `apd12.dll` (`32c942ed`), a backup `d3d12.dll.bak_fh4_archive_...` (196608 bytes, `02aa6734`) and `apd12.dll.bak_repo_...`. So the D3DMetal path of this install is modified for FH4. A backup of the original exists (`d3d12.dll.bak_fh4_archive_...`) |
+| Meaning | Run set 2 is a failure of the FH4-modified CrossOver install, not of FH5. Unknown: whether a stock install would run FH5, and why the same error showed in set 1 |
 
 Log files (gitignored): `logs/set2-run1.log`, `logs/set2-run2.log`, `logs/set2-run3.log`. Config copy: `evidence/private/cxbottle-newbottle-d3dmetal.conf`.
 
@@ -148,9 +147,9 @@ Log files (gitignored): `logs/set2-run1.log`, `logs/set2-run2.log`, `logs/set2-r
 
 Local result (3 of 3 runs, section 3): the game process never starts. Wine aborts at loader init because the builtin `d3d12.dll` fails to initialize (status `c0000142`). This is before any game code and before any exception.
 
-Class: environment or graphics-backend initialization failure. It is not a game crash. This bottle cannot test the FH4 launch-loop class: it carries the FH4 patched `kernelbase.dll` (D-015), which would hide that class. Confidence: high that the failure is in `d3d12.dll` init. Unknown why. The candidates are a D3DMetal backend that does not load in this bottle, or a missing device setting. Both are untested. A +d3d12,+dxgi,+module log is the next evidence.
+Class: environment failure. The CrossOver install carries the FH4 proxy in its D3DMetal path. It is not a game crash. This bottle cannot test the FH4 launch-loop class: it carries the FH4 patched `kernelbase.dll` (D-015), which would hide that class. Confidence: high that the failure is in `d3d12.dll` init. Unknown why. Run set 2 shows the cause for that set: the FH4 proxy loads and its fallback DLL is missing. Set 1 has no section data, so its cause is unknown.
 
-This result is not yet a statement about FH5. A graphics-init failure can hit any D3D12 title in this bottle. A control test with another D3D12 game would show if the bottle itself is at fault. That needs Adam's approval.
+This result is not yet a statement about FH5. The FH4 proxy in the D3DMetal path fails for any D3D12 game in a bottle without its provider DLL. A control game would fail the same way. A clean test needs a stock D3DMetal path (decisions.md, question 6).
 
 Prior (from public reports, not local evidence): see section 5. Two classes are candidates: launch failure and rendering/runtime crash.
 
@@ -226,7 +225,7 @@ No Heroic, Whisky, Parallels or WineHQ AppDB entry for FH5 was found. Parallels 
 
 ## 6. Feasibility rating
 
-Update 05/11/2026: run set 1 failed at the bottle or graphics-backend level (section 3). It does not change the FH5 rating yet.
+Update 05/11/2026: both run sets failed in `d3d12.dll` init, and set 2 shows the FH4 proxy in CrossOver's D3DMetal path as the cause (section 3). This does not change the FH5 rating yet.
 
 Rating: possible.
 
@@ -252,7 +251,7 @@ Each step needs approval from Adam.
 | 2 | Read the EXE import table with a PE tool (needs approval to install `pefile` or `llvm`) | List of imports for appmodel, GameInput, dstorage, WebView2 |
 | 3 | Phase 2: start Steam and FH5, watch 60 seconds, then run the EXE with `WINEDEBUG=+loaddll,+seh,+timestamp,err+all`, three runs | Three logs in logs/ (gitignored). Last DLL, first exception, exit code recorded |
 | 4 | Phase 3: classify the failure | One table row with log lines as proof |
-| 5 | Check which D3DMetal version the bottle loads | Partly answered 05/11/2026: no D3DMetal module loads, the bottle uses plain Wine d3d12 (section 3). Next: Adam sets Graphics to D3DMetal, then a rerun shows the module path |
+| 5 | Check which D3DMetal version the bottle loads | Answered 05/11/2026: with D3DMetal selected, the FH4 proxy loads, not a stock D3DMetal d3d12 (section 3). Next: a stock D3DMetal path (decisions.md, question 6) |
 | 0 | Decided (D-011): run Phase 2 in a new clean bottle. Adam creates it in CrossOver, signs in to Steam himself and adds the SSD library folder. Quit the patched `Steam` bottle first so two Steam instances never share the library | Bottle exists. Steam shows FH5 as installed |
 | 6 | Find out who owns the FH4 repo. If it is not Adam, ask the owner for a license (open an issue only with Adam approval) | Written license reply |
 | 7 | If rendering is reached: capture input layouts with a minimal proxy | Offsets table from the census log |
