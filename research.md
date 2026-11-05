@@ -399,27 +399,30 @@ Run set 18 ran on 05/11/2026 (late evening) and 06/11/2026 (night). Adam approve
 |---|---|---|
 | run1 | Forwarder exports, no `apd12.dll` in the bottle `system32` | The proxy loaded as native from the game folder. The hook installed and counted 2 calls. Wine logged `find_forwarded_export module not found for forward 'apd12.D3D12CreateDevice'`. The game crashed (winedbg "Program Error", about 60 s) and the process stayed up behind the dialog until the 1200 s timeout |
 | run1b | Forwarder exports, `apd12.dll` copied into `system32` | `apd12.dll` loaded. The game crashed at about 60 s with `Unhandled page fault on execute access` at the proxy load base plus `0x7162`. That offset is the forwarder entry of `D3D12CreateDevice` in the export table. So something ran the export table address as code. Forwarders do not work for this game. The hook counted 3 calls |
-| run1c | Real jump thunks into `apd12.dll`, clamp off (`FH5PX_CLAMP=0`) | Provider functions found: 12 of 12. No crash in 1200 s (stopped by the timeout). The hook counted about 211,700 calls (about 175 per second). Every call used `cb` = 72, so `PrivateUsage` is never requested. The pagefile value was 149.9 GB on every late call (86 GB on the first calls). Wine logged 213,250 class 3 `NtQueryInformationProcess` queries, so the hook sees nearly all of them. The screen shows the loading screen until about 100 s, then the title screen ("START GAME", "ACCESSIBILITY/SETTINGS") |
-| run2 | Same proxy, clamp on | Same polling rate (about 211,000 calls). Same timeline: title screen from about 100 s to the timeout. No crash |
-| run3 control | No proxy, no `d3d12` override, stock D3DMetal `d3d12.dll` loaded from `system32`, 7 minute cap | Same timeline: loading screen until about 100 s, then the title screen. No crash |
+| run1c | Real jump thunks into `apd12.dll`, clamp off (`FH5PX_CLAMP=0`) | Provider functions found: 12 of 12. No crash in 1200 s (stopped by the timeout). The hook counted about 211,700 calls (about 175 per second). Every call used `cb` = 72, so `PrivateUsage` is never requested. The pagefile value was 149.9 GB on every late call (86 GB on the first calls). Wine logged 213,250 class 3 `NtQueryInformationProcess` queries, so the hook sees nearly all of them. The screen shows the loading screen until about 107 s, then the title screen ("START GAME", "ACCESSIBILITY/SETTINGS") |
+| run2 | Same proxy, clamp on | Same polling rate (about 211,000 calls). Same timeline: title screen from about 107 s to the timeout. No crash |
+| run3 control | No proxy, no `d3d12` override, stock D3DMetal `d3d12.dll` loaded from `system32`, 7 minute cap | Same timeline: loading screen until about 107 s, then the title screen. No crash |
 
-How the screen state was read: a pixel test on the right end of the bottom hint bar (about 4,000 bright pixels on the title screen, 0 on the loading screen). It matches the sets 16 and 17 screenshots, which all score 0. Adam can check by eye: `logs/set18/run2/t994_w3163.png` and `logs/set18/run1c/t1013_w2959.png` (title screen) against any frame in `logs/set17/run1/` (loading).
+How the screen state was read: a pixel test on the right end of the bottom hint bar. A real title frame scores about 3,900 to 4,100 bright pixels. A loading frame scores 0, or about 2,600 when the background is bright sand (a false positive at a lower threshold), so the threshold is 3,300. I checked the end frames by eye. Adam can check too: `logs/set18/run2/t994_w3163.png` and `logs/set18/run1c/t1013_w2959.png` (title screen) against any frame in `logs/set17/run1/` (loading).
 
 | Fact | Detail |
 |---|---|
 | Log of the clamp | The proxy logs the value before the clamp and only the first 3 clamped calls. So the clamped value is not measured. The log shows that the clamp fired (2 fields changed on the first call), not what the game read afterwards |
-| What did not change | The clamp has no visible effect. Run 1c (clamp off), run 2 (clamp on) and the control all reach the title screen at the same time |
+| What was not tested | Whether the clamp or the proxy helps with the stall of sets 15 to 17. That stall comes after the title screen, and all set 18 runs stopped at the title screen. Run 1c, run 2 and the control look the same until then |
 | Game polls memory | About 175 calls per second, for the whole run, also at the title screen. The pagefile value that the game reads is about 150 GB against 24 GiB of RAM. The same number appears in the game's `PreCrashReport.xml` (151 GB) |
 | Not tested | Pressing START, free roam, the `0x800705AA` error, the controller (nobody could press anything), a run longer than 20 minutes at the title screen |
 
 Meaning:
 
-- Tonight the game reaches the title screen in about 100 s with plain CrossOver and D3DMetal 4.0b3 (control run). Sets 14 to 17 sat on "LOADING... PLEASE WAIT" for 15 minutes or more with the same Steam launch. The proxy and the clamp are not the reason for the change.
-- What changed between set 17 and set 18 is not known. Candidates: a cache (shader or pipeline data) that the long earlier runs wrote, a first-run Steam or cloud step that finished, or the identity (set 17 used NVIDIA, sets 16 and 18 used Arc). A search of the bottle found no large recent cache file, so the cache idea has no direct support. One more run with a cleared Metal cache, or with the NVIDIA identity, would separate them.
-- The memory polling is real and constant, but it does not block loading in this setup.
+- All set 18 runs stopped at the title screen ("START GAME") from about 107 s. Nobody pressed START. The control run, run 1c (clamp off) and run 2 (clamp on) look the same up to this point.
+- The title screen is not new. Sets 10, 12, 15 and 17 showed it too. A re-check of the sets 15 to 17 screenshots shows one real title frame in set 17 (131 s, "START GAME" over a desert scene), then "LOADING... PLEASE WAIT" from 144 s to the end. So the long stall of sets 14 to 17 comes after the title screen. Set 18 never reached that stage. Set 16 continued the game session of set 15 and shows no title frame.
+- So set 18 does not show what causes the stall. It tests neither the clamp nor the proxy against it. It shows that the proxy loads, the hook runs (about 175 calls per second) and the game does not crash with it.
+- It is not recorded whether Adam pressed START in set 17 or the game went on by itself. Ask Adam.
+- The memory polling (about 150 GB read against 24 GiB of RAM) is real and constant, also at the title screen. Whether it matters after START is open.
 - Forwarder exports are not usable for this game. A proxy for it must export real code.
+- Next test: with the proxy installed, Adam presses START, once with `FH5PX_CLAMP=0` and once with the clamp on, and we compare how long the loading screen lasts.
 
-State after the runs (restored on 06/11/2026, 01:55 to 02:00): no `d3d12.dll` in the game folder, no `d3d12` registry value (the `concrt140` value is still there), no `apd12.dll` in the bottle `system32`, no Wine process running. To install the proxy again: build with `sh proxy/build.sh`, copy `build/d3d12.dll` into the game folder, copy the provider `apd12.dll` into the bottle `system32`, and add the value `d3d12` = `native,builtin` under `HKCU\Software\Wine\AppDefaults\ForzaHorizon5.exe\DllOverrides`.
+State after the runs (restored on 06/11/2026: the game-folder DLL and the registry value were removed before the control run, `apd12.dll` after it, all by about 02:00): no `d3d12.dll` in the game folder, no `d3d12` registry value (the `concrt140` value is still there), no `apd12.dll` in the bottle `system32`, no Wine process running. To install the proxy again: build with `sh proxy/build.sh`, copy `build/d3d12.dll` into the game folder, copy the provider `apd12.dll` into the bottle `system32`, and add the value `d3d12` = `native,builtin` under `HKCU\Software\Wine\AppDefaults\ForzaHorizon5.exe\DllOverrides`.
 
 Log files (gitignored): `logs/set18-*.log`, `logs/set18/`.
 
@@ -556,7 +559,7 @@ Update 05/11/2026 (run set 13): the debug log shows a deliberate shutdown (WebVi
 
 Update 05/11/2026 (Steam launch and an external report): through Steam (license agreement accepted by Adam, signed in), the game reaches a long "LOADING... PLEASE WAIT" screen instead of quitting after a minute. A third-party report (unverified) describes the same stack working with a d3d12 proxy that fixes descriptor size, blend state, unwind and memory counters, and says a first start can sit for minutes on shader builds. Rating: "possible", now with a partial path to "works".
 
-Update 06/11/2026 (run set 18): with plain CrossOver and D3DMetal 4.0b3 (no proxy), the game reaches the title screen in about 100 s (control run). Our own d3d12 proxy loaded and its memory hook ran about 175 times per second, but neither the proxy nor the memory clamp changed the result. Why sets 14 to 17 were stuck on loading is open. Rating: "possible", now with a game that renders and reaches the title screen. Next: press START (Adam), then check free roam, the controller and the `0x800705AA` error.
+Update 06/11/2026 (run set 18): our own d3d12 proxy loads in the game and its memory hook runs about 175 times per second without a crash. The game reaches the title screen at about 107 s with and without the proxy (control run). The title screen is not new, and the long stall of sets 14 to 17 comes after it, so set 18 did not test it. Rating: "possible". Next: Adam presses START with the proxy installed, once with the clamp off and once on, and we compare the loading time.
 
 Rating: possible.
 

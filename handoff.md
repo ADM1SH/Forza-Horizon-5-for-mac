@@ -11,7 +11,7 @@ Updated: 05/11/2026.
 ## 2. Current state
 
 - Docs and rules are written. Git is initialised on branch main. The first commit is made on 05/11/2026. The GitHub repo `ADM1SH/Forza-Horizon-5-for-mac` is created and pushed in the same session (status in section 4).
-- Status 06/11/2026 (written at about 02:30 while Adam slept): the game reaches the title screen through Steam in about 100 s with plain CrossOver 26.3 and D3DMetal 4.0b3, also without our proxy (set 18 control run). Nobody has pressed START yet. Free roam, the controller and the `0x800705AA` error are untested. Why sets 14 to 17 were stuck on loading is not known (research.md section 3, set 18).
+- Status 06/11/2026 (written around 02:00 while Adam slept): the game reaches the title screen through Steam in about 107 s with plain CrossOver 26.3 and D3DMetal 4.0b3, also without our proxy (set 18 control run). Nobody pressed START in set 18. The long stall of sets 14 to 17 comes after the title screen, so set 18 did not test it. Free roam, the controller and the `0x800705AA` error are untested (research.md section 3, set 18).
 - FH5 is fully installed (StateFlags 4, buildid 21856128). It sits in the Steam library folder on the external SSD (`SteamGames`).
 - EXE: `ForzaHorizon5.exe`, 176231056 bytes, SHA-256 `eb71ee4a6ae092b854c58751342c6d06a4d9bc00f089b81e72b073d4867b76b7`.
 - The new bottle `Steam forza 5` exists (D-011). Its facts are in research.md section 1. One Steam runs in it. Its Steam library list shows the SSD folder.
@@ -57,12 +57,12 @@ Updated: 05/11/2026.
 
 - None. Some pages did not load for the Phase 4 agents (CodeWeavers compatibility page, Wine bugzilla, ProtonDB body returned 403 or empty). Re-read them in a browser.
 - Forwarder exports in the proxy `.def` (set 18 run1 and run1b): Wine did not find `apd12`, then the game ran the forwarder entry as code. Replaced by jump thunks (D-020).
-- The memory clamp did not change anything visible (set 18 run 1c against run 2).
+- The memory clamp could not be judged: no set 18 run went past the title screen.
 
 ## 6. Next steps
 
 1. Ask Adam to press START on the title screen and report free roam, the controller and any error. Press nothing in the game without Adam.
-2. Then decide with Adam: find why sets 14 to 17 were stuck on loading (clear the Metal cache, or repeat set 17 with the NVIDIA identity), or fix errors from free roam (implementation_plan.md Phase 5 step 4). No download of third-party binaries without approval.
+2. Then test the stall after START with the proxy installed, clamp off and clamp on (implementation_plan.md Phase 5 step 4), or fix errors from free roam. Ask Adam if he pressed START in set 17. No download of third-party binaries without approval.
 3. Settings that matter: native `concrt140.dll` (registry override), the GPU spoof (Steam started with `D3DM_*` variables, not permanent), the Steam license agreement accepted.
 4. Open approvals: permanent settings, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
 5. Local logs in logs/ use about 8 GB (set 18 added about 0.2 GB). The watcher script for set 18 is `run18.sh` in the session scratchpad. Delete old logs only with Adam's approval.
