@@ -260,7 +260,7 @@ Run set 8 on 05/11/2026. Approved by Adam: "Approve run set 8". Registry overrid
 | Exceptions | `c000001d` about 429000, 332000 and 766000. Handled by the in-EXE handler as before |
 | Log sizes | 374 MB, 289 MB, 667 MB |
 
-Meaning: the combination of the native `concrt140.dll` and the GPU spoof removed both known access violations (0 of 3 runs). This is the best result so far: the game gets to the Xbox sign-in browser stage. What Adam saw on screen is not recorded yet.
+Meaning: the combination of the native `concrt140.dll` and the GPU spoof removed both known access violations (0 of 3 runs). This is the best result so far: the game gets to the Xbox sign-in browser stage. Adam's report on screen: "blank or frozen" (05/11/2026). The text of the screen is not known. This matches public reports 4 and 5 in section 5.2 (black or blank Xbox sign-in window).
 
 Log files (gitignored): `logs/set8-run1.log`, `logs/set8-run2.log`, `logs/set8-run3.log`.
 
@@ -363,6 +363,8 @@ Update 05/11/2026 (run set 5): the game-code crash at `+0x4f77cb0` happened in 2
 Update 05/11/2026 (run set 7): with the native `concrt140.dll`, the `+0x4f77cb0` crash is gone in 3 of 3 runs. Two runs crash at `+0x667BA5` (null pointer read, public report 4 address), one run ends abruptly. The rating stays "possible" and the evidence improves: two named faults, one with a likely Wine cause and one with a reported GPU-spoof fix.
 
 Update 05/11/2026 (run set 8): with the native `concrt140.dll` and the GPU spoof, no access violation in 3 of 3 runs, and two runs reach the Xbox sign-in browser (WebView2). The rating stays "possible" and gets stronger. Open: what the screen shows, and why the processes end.
+
+Update 05/11/2026 (Adam's screen report for set 8): the screen is blank or frozen. With two runs at WebView2, the blank window is probably the Xbox sign-in browser (public reports 4 and 5). Not proven: no screenshot, no process list of the WebView2 children.
 
 Rating: possible.
 
