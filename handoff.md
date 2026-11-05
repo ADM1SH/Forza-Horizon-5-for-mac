@@ -41,6 +41,7 @@ Updated: 05/11/2026.
 - Plan A: restored the original GPTK `d3d12.dll` in CrossOver (backup first). Details in implementation_plan.md Phase 2b.
 - Ran FH5 three more times after Plan A (run set 3). Result in research.md section 3.
 - Ran FH5 three more times with Steam running (run set 4). Crash details from Adam's dialog file are in research.md section 3.
+- Ran FH5 three more times with a GPU spoof on the command line (run set 5). Same crash.
 - Changed nothing in the bottle, CrossOver, Steam, the game folder or the FH4 repo. Only read-only commands ran (find, grep, stat, shasum).
 
 ## 5. Failed attempts
@@ -49,8 +50,8 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Run set 4 is done. With Steam running, FH5 crashes in game code (two fault addresses). Evidence: research.md sections 3 and 4.
-2. Next: Adam approves run set 5 with a GPU device spoof on the command line only (task_today.md). It changes no file.
+1. Run set 5 is done. The crash at `+0x4f77cb0` repeats in 3 of 3 runs, with a GPU spoof on the command line (research.md section 3).
+2. Next: a read-only study of the crash site (task_today.md). No patch work.
 3. Open approvals: control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner for a license.
 4. Rollback of Plan A is in implementation_plan.md Phase 2b step 7.
-5. Local logs in logs/ use about 540 MB. Delete old ones only with Adam's approval.
+5. Local logs in logs/ use about 800 MB. Delete old ones only with Adam's approval.

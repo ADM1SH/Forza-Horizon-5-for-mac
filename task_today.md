@@ -2,13 +2,12 @@
 
 Do not edit `cxbottle.conf`. Ask Adam before every run.
 
-Status on 05/11/2026: run set 4 (Steam running) crashes in game code (research.md sections 3 and 4). The second crash address matches public report 4, which a GPU device spoof avoided.
+Status on 05/11/2026: run sets 4 and 5 crash in game code at `ForzaHorizon5.exe+0x4f77cb0` (research.md sections 3 and 4). The GPU spoof did not change it.
 
 Steps:
 
-1. Ask Adam to approve run set 5: the same command as set 4, plus the three environment variables `D3DM_VENDOR_ID=0x8086`, `D3DM_DEVICE_ID=0x56a1`, `D3DM_DEVICE_DESCRIPTION` set on the command line only (values from research.md section 1, as the old bottle used). This changes no file. Steam must run in the bottle. 3 runs. Close the crash dialog between runs.
-2. Record the result in research.md section 3. Compare the fault address with set 4.
-3. Later approvals: control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner for a license.
-4. Stop. Show the summary and wait for approval before any patch work.
+1. Read-only study of the crash site: dump the bytes around RVA `0x4f77cb0` and the call chain RVAs `0x4f78697`, `0x4f7cca2`, `0x4f97875`, `0x4b75cb2`, `0x947676` from the EXE with the Python standard library. Write only the facts into research.md. Do not change the EXE. Do not publish EXE bytes in the repo (copyrighted game code). Record addresses and a one-line meaning only.
+2. Ask Adam about the later approvals: control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner for a license.
+3. Stop. Show the summary and wait for approval before any patch work. Patch work is out of scope for this phase.
 
-Check: research.md section 3 has the run set 5 result.
+Check: research.md section 4 has the crash-site study.
