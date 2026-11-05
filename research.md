@@ -162,15 +162,34 @@ Probable cause of the exit: unproven. The game loads the Steam client library at
 
 Log files (gitignored): `logs/set3-run1.log`, `logs/set3-run2.log`, `logs/set3-run3.log`.
 
+### Run set 4 (Steam running in the bottle)
+
+Run set 4 on 05/11/2026. Approved by Adam: "Approve" (after Adam started Steam in the bottle himself). Same command as set 3. Three runs. `cxbottle.conf` unchanged (`5fddfef4`). Adam sent the Wine crash dialog text as a file (kept in evidence/private/, gitignored).
+
+| Item | Result |
+|---|---|
+| Result | The game now stays up. All three runs end in a game crash: an access violation inside `ForzaHorizon5.exe`. Wine shows an "Unhandled exception" dialog. The process waits at the dialog |
+| Crash 1 (runs 1 and 2) | Page fault on write to address `0x19`, at `ForzaHorizon5.exe+0x4f77cb0`, instruction `movq %r15, 8(%rax)` with `rax = 0x11`. A small value in `rax` means a bad or null pointer. All 9 backtrace frames are in the EXE, plus `kernel32` and `ntdll` thread start frames. No frame is in Wine, `d3d12`, `dxgi` or D3DMetal |
+| Crash 2 (run 3) | The first access violation is at `ForzaHorizon5.exe+0x667BA5` (log address `0x140667BA5`). Section 5.2 report 4 names the same address (read violation with the default AMD GPU ID) |
+| Modules at crash | 1210 modules. They include `d3dmetal`, `libd3dshared`, `d3d12`, `d3d12core`, `dxgi`, `steamclient64`, `gameoverlayrenderer64`, `steam_api64`, `sl.*` (Streamline), `libxess`, `partywin`, `partyxboxlive`, `webview2loader`, `mfplat`. So the game got through startup and loaded its graphics and Xbox layers |
+| Exceptions | `c000001d` about 219000 in runs 1 and 2, about 663000 in run 3 (longer run). Each run: 2 access-violation lines at the crash |
+| Runtime | Run 1 about 612 s of log clock, but it includes the time the dialog waited for Adam. Runs 2 and 3: 27 s and 53 s |
+| Steam | `steamclient64.dll` loads 3 times per run and stays loaded. The 13 s exit of set 3 is gone. So the set 3 exit was probably a missing Steam client. Not proven by a controlled test |
+| Not captured | A screen description before the crash. The exit code |
+
+Meaning: the Mac stack runs the game into game code now. The crash is a game-code fault, not a Wine or D3DMetal init failure. Two different fault addresses in three runs. Whether this bottle lacks a GPU device spoof is a candidate cause for crash 2 only. The old `Steam` bottle set a device spoof (section 1). The new bottle sets none. Not tested.
+
+Log files (gitignored): `logs/set4-run1.log` (108 MB), `logs/set4-run2.log` (109 MB), `logs/set4-run3.log` (321 MB). The crash file: evidence/private/fh5-crash-backtrace-set4.txt.
+
 ## 4. Failure class (Phase 3)
 
-Local result (3 of 3 runs, section 3): the game process never starts. Wine aborts at loader init because the builtin `d3d12.dll` fails to initialize (status `c0000142`). This is before any game code and before any exception.
+Latest result (run set 4, section 3): the game runs and crashes inside its own code with an access violation. Class: runtime crash in game code (not launch failure, not graphics init failure). Two fault addresses seen (`+0x4f77cb0` write, `+0x667BA5` read). The second one matches public report 4 in section 5.2.
 
-Class: environment failure. The CrossOver install carries the FH4 proxy in its D3DMetal path. It is not a game crash. This bottle cannot test the FH4 launch-loop class: it carries the FH4 patched `kernelbase.dll` (D-015), which would hide that class. Confidence: high that the failure is in `d3d12.dll` init. Unknown why. Run set 2 shows the cause for that set: the FH4 proxy loads and its fallback DLL is missing. Set 1 has no section data, so its cause is unknown.
+Earlier results, for the record: sets 1 and 2 failed in `d3d12.dll` init because the FH4 proxy sat in CrossOver's D3DMetal folder. Set 3 exited after about 13 s without a Steam client running. Both are environment effects, not FH5 behavior.
 
-This result is not yet a statement about FH5. The FH4 proxy in the D3DMetal path fails for any D3D12 game in a bottle without its provider DLL. A control game would fail the same way. A clean test needs a stock D3DMetal path (decisions.md, question 6).
+Confidence: high that the class is a game-code runtime crash. Unknown: the root cause. Candidates: a missing GPU device spoof in this bottle (for the read violation, per report 4), a D3DMetal behavior that the game does not expect, or the anti-tamper layer. All untested.
 
-Prior (from public reports, not local evidence): see section 5. Two classes are candidates: launch failure and rendering/runtime crash.
+Prior (from public reports, not local evidence): see section 5.
 
 ## 5. External findings (Phase 4)
 
@@ -247,6 +266,8 @@ No Heroic, Whisky, Parallels or WineHQ AppDB entry for FH5 was found. Parallels 
 Update 05/11/2026: both run sets failed in `d3d12.dll` init, and set 2 shows the FH4 proxy in CrossOver's D3DMetal path as the cause (section 3). This does not change the FH5 rating yet.
 
 Update 05/11/2026 (run set 3): with the original `d3d12.dll`, FH5 starts and runs about 13 s, then exits. The rating stays "possible". Evidence for it is better now: the D3DMetal path loads and the game runs past `d3d12.dll` init. No rendering or window evidence yet.
+
+Update 05/11/2026 (run set 4): with Steam running, FH5 runs into game code and crashes there. Rating stays "possible", but the crash is not explained yet. The reports 1 and 2 of section 5.1 said that launch fails. Here launch works and the failure moves to a game-code crash.
 
 Rating: possible.
 
