@@ -1,6 +1,6 @@
 # Research: Forza Horizon 5 on Apple Silicon
 
-Date: 05/11/2026. Phase status: Phase 0, 1 and 4 done. Phase 2 and 3 not run (the game is installed, the new bottle `Steam forza 5` exists, launch tests wait for Adam). No patch work.
+Date: 05/11/2026. Phase status: Phase 0, 1 and 4 done. Phase 2 run 4.0b3 set done (3 runs). Phase 3 first result in section 4. No patch work.
 
 Label rules: "unknown" means no proof yet. Each unknown names the way to prove it.
 
@@ -106,13 +106,34 @@ The exception handler is on by default in the proxy. It uses base-relative RVAs,
 
 ## 3. Evidence from launch tests (Phase 2)
 
-Not run. Reason: Adam must approve the launch tests. The new bottle `Steam forza 5` exists (section 1). The download ended on 05/11/2026.
+Run set 1 on 05/11/2026. Approved by Adam: "Yes, run 4.0b3". Bottle `Steam forza 5`, installed D3DMetal 4.0b3, Steam running in the same bottle. Command: CrossOver `wine --bottle "Steam forza 5" --debugmsg +loaddll,+seh,+timestamp,err+all --cx-app <Windows path of ForzaHorizon5.exe>`. Three runs.
 
-Log file names: none.
+| Item | Result |
+|---|---|
+| Exit code | 66, all three runs |
+| Process | The game process never starts. Wine aborts at loader init, about 0.5 s after the process begins |
+| Last DLL loaded | `WebView2Loader.dll` (native). Before it: `PartyXboxLive.dll`, `steam_api64.dll` (native), `d3d12.dll` and `dxgi.dll` (builtin, from `system32`) |
+| First error | `err:module:loader_init "d3d12.dll" failed to initialize, aborting` |
+| Second error | `Initializing dlls for ... ForzaHorizon5.exe failed, status c0000142` |
+| Exceptions (`+seh`) | None. The failure is before any game code runs |
+| D3DMetal in the log | No D3DMetal or `apple_gptk` module line appears. Which D3DMetal the bottle loads stays unknown |
+| Consistency | Same two error lines and the same log size (10984 bytes) in runs 1, 2 and 3 |
+| Bottle unchanged | `cxbottle.conf` SHA-256 starts `9a4bf36d` before and after |
+
+Notes:
+- A first attempt with a relative file name and `WINEDEBUG` gave no log. CrossOver's `wine` wrapper needs the `--debugmsg` option and a Windows path. These runs are not counted.
+- The `d3d12.dll` in the log is the builtin file. The failure is inside its initialization, not in the game. The cause is unknown. Prove it with a log that adds `+d3d12,+dxgi,+module` (needs Adam's approval to run again).
+- The game was not started through Steam (no Steam ownership check ran). Steam was running in the bottle. A launch from the Steam UI is the other Phase 2 test and is not run.
+
+Log file names (gitignored, local only): `logs/run1-debugmsg.log`, `logs/run2.log`, `logs/run3.log`.
 
 ## 4. Failure class (Phase 3)
 
-Unclassified. There is no local evidence. Do not pick a row from the table in the brief.
+Local result (3 of 3 runs, section 3): the game process never starts. Wine aborts at loader init because the builtin `d3d12.dll` fails to initialize (status `c0000142`). This is before any game code and before any exception.
+
+Class: environment or graphics-backend initialization failure. It is not a game crash and it is not the FH4 launch-loop class. Confidence: high that the failure is in `d3d12.dll` init. Unknown why. The candidates are a D3DMetal backend that does not load in this bottle, or a missing device setting. Both are untested. A +d3d12,+dxgi,+module log is the next evidence.
+
+This result is not yet a statement about FH5. A graphics-init failure can hit any D3D12 title in this bottle. A control test with another D3D12 game would show if the bottle itself is at fault. That needs Adam's approval.
 
 Prior (from public reports, not local evidence): see section 5. Two classes are candidates: launch failure and rendering/runtime crash.
 

@@ -11,7 +11,7 @@ Updated: 05/11/2026.
 ## 2. Current state
 
 - Docs and rules are written. Git is initialised on branch main. The first commit is made on 05/11/2026. The GitHub repo `ADM1SH/Forza-Horizon-5-for-mac` is created and pushed in the same session (status in section 4).
-- Phase 0, 1 and 4 are done. Phase 2 and 3 are not run.
+- Phase 0, 1 and 4 are done. Phase 2 run set 1 and Phase 3 first result are done (05/11/2026). The game process does not start.
 - FH5 is fully installed (StateFlags 4, buildid 21856128). It sits in the Steam library folder on the external SSD (`SteamGames`).
 - EXE: `ForzaHorizon5.exe`, 176231056 bytes, SHA-256 `eb71ee4a6ae092b854c58751342c6d06a4d9bc00f089b81e72b073d4867b76b7`.
 - The new bottle `Steam forza 5` exists (D-011). Its facts are in research.md section 1. One Steam runs in it. Its Steam library list shows the SSD folder.
@@ -37,6 +37,7 @@ Updated: 05/11/2026.
 - Wrote D-012 to D-016 in decisions.md. Removed FH4 line numbers, function names, key names and the provider DLL name from research.md and SECURITY.md (D-016).
 - Ticked the finished boxes in implementation_plan.md and testing.md. Made the first commit.
 - Created the public repo https://github.com/ADM1SH/Forza-Horizon-5-for-mac and pushed `main` (05/11/2026). Protection on `main`: no force push, no deletion. No required reviews and admins are not enforced, so small direct commits still work.
+- Ran FH5 three times under Wine with debug logs (Adam approved). Logs are in logs/ (gitignored). The result is in research.md sections 3 and 4.
 - Changed nothing in the bottle, CrossOver, Steam, the game folder or the FH4 repo. Only read-only commands ran (find, grep, stat, shasum).
 
 ## 5. Failed attempts
@@ -45,6 +46,8 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Next session: do task_today.md (import-table read, then stop and ask before the Phase 2 launch tests).
-2. Adam decides: a stock CrossOver reinstall for a full baseline (decisions.md, question 6), and an issue to the FH4 owner for a license (needs his approval).
-3. Phase 2 launch tests need Adam's approval for each run.
+1. Phase 2 run set 1 (D3DMetal 4.0b3) is done: `d3d12.dll` fails to initialize, status `c0000142`, exit 66, 3 of 3 runs (research.md sections 3 and 4).
+2. Ask Adam to approve a diagnostic run with `+d3d12,+dxgi,+module` added. Same bottle, same command.
+3. Ask Adam to approve a control test: any other D3D12 game in the same bottle. It shows if the bottle or FH5 is at fault.
+4. Ask Adam about the stock D3DMetal 3.0 run (D-012) and the Steam UI launch.
+5. Adam decides: a stock CrossOver reinstall (decisions.md, question 6), and an issue to the FH4 owner for a license.

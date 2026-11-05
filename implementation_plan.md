@@ -19,9 +19,9 @@ Owner of all phases: Adam, with Claude as the research assistant. No other AI ow
 - [x] Adam creates the new clean bottle, signs in to Steam, adds the SSD library folder (D-011, done 05/11/2026)
 - [x] Quit Steam and bottle processes in the patched `Steam` bottle first (one wineserver left, 05/11/2026)
 - [ ] Launch from Steam, watch 60 seconds
-- [ ] Run the EXE with `WINEDEBUG=+loaddll,+seh,+timestamp,err+all`
+- [x] Run the EXE with `+loaddll,+seh,+timestamp,err+all` (05/11/2026, 3 runs, research.md section 3)
 - [ ] Check Steam and CrossOver logs
-- [ ] Repeat two more times
+- [x] Repeat two more times (same result)
 
 ## Phase 3: classify the failure
 
