@@ -1,0 +1,22 @@
+# Testing
+
+No code exists yet. These are the research checks.
+
+## Phase 0
+
+- [ ] EXE SHA-256 is recorded and matches a second run of `shasum -a 256`.
+- [x] `appmanifest_1551360.acf` shows StateFlags 4 (05/11/2026).
+
+## Phase 2
+
+- [ ] Three runs of the same test produce logs in logs/ (gitignored).
+- [ ] Each log gives: last DLL loaded, first exception, exit code, any repeated call.
+- [ ] The three results match. If not, stop and ask.
+- [ ] The real bottle is unchanged: `cxbottle.conf` hash is the same before and after.
+
+## Docs
+
+- [x] No em dashes in any .md file (05/11/2026).
+- [x] No `/Users/<name>` path in a public file (05/11/2026).
+- [x] `git status` shows CLAUDE.md and evidence/private/ as ignored (05/11/2026).
+- [x] No `.dll`, `.exe`, `.vdf`, `.acf` or log file is staged (05/11/2026).

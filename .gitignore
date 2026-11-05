@@ -1,0 +1,27 @@
+# Local rules copy (personal context)
+CLAUDE.md
+CLAUDE.local.md
+GEMINI.md
+
+# Evidence that can hold account data or large dumps
+evidence/private/
+logs/
+*.log
+
+# Binaries: never commit Apple, Wine or game files
+*.dll
+*.exe
+*.dylib
+*.framework/
+*.vdf
+*.acf
+
+# Secrets
+.env
+.env*
+.dev.vars
+*.key
+*.pem
+
+# OS
+.DS_Store
