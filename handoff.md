@@ -36,6 +36,7 @@ Updated: 05/11/2026.
 - Recorded the new bottle `Steam forza 5` (research.md section 1, copy of its config in evidence/private/, gitignored). Found that its `kernelbase.dll` is the FH4 patched file (D-015).
 - Wrote D-012 to D-016 in decisions.md. Removed FH4 line numbers, function names, key names and the provider DLL name from research.md and SECURITY.md (D-016).
 - Ticked the finished boxes in implementation_plan.md and testing.md. Made the first commit.
+- Created the public repo https://github.com/ADM1SH/Forza-Horizon-5-for-mac and pushed `main` (05/11/2026). Protection on `main`: no force push, no deletion. No required reviews and admins are not enforced, so small direct commits still work.
 - Changed nothing in the bottle, CrossOver, Steam, the game folder or the FH4 repo. Only read-only commands ran (find, grep, stat, shasum).
 
 ## 5. Failed attempts
