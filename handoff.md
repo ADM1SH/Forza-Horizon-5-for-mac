@@ -51,8 +51,8 @@ Updated: 05/11/2026.
 
 ## 6. Next steps
 
-1. Crash-site study is done (research.md section 4). The crash comes from a bad return value of `_Internal_push_back` in CrossOver's `concrt140.dll`. Hypothesis only. One run passed the crash site, so it is not deterministic.
-2. Next: check if that DLL is stock (task_today.md). Then decide on tests with Adam.
-3. Open approvals: native `concrt140.dll` override, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
-4. Rollback of Plan A is in implementation_plan.md Phase 2b step 7.
-5. Local logs in logs/ use about 840 MB. Delete old ones only with Adam's approval.
+1. Run set 7 is done: with the native `concrt140.dll` (registry override), the `+0x4f77cb0` crash is gone in 3 of 3 runs. Runs 2 and 3 crash at `+0x667BA5` (research.md section 3). Run 1 ended abruptly.
+2. Next: run set 8 with the native `concrt140` plus the GPU spoof (task_today.md). Needs Adam's approval.
+3. Open approvals: control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
+4. Undo for the override is in research.md section 4. Rollback of Plan A is in implementation_plan.md Phase 2b step 7.
+5. Local logs in logs/ use about 1.6 GB. Delete old ones only with Adam's approval.

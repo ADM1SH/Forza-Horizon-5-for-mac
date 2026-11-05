@@ -237,14 +237,15 @@ Run set 7 on 05/11/2026. Approved by Adam: "Approve run set 7" (restarted once a
 | Item | Result |
 |---|---|
 | Override works | Yes. `CONCRT140.dll` loads as `native` in every run (log line). The first stuck run showed the same |
-| Crash at `+0x4f77cb0` | Not seen in runs 1 and 2 (0 access violations at that address). In earlier sets it hit in 5 of 7 runs. With 2 runs this is a hint, not a proof |
+| Crash at `+0x4f77cb0` | Not seen in any of the 3 runs. In earlier sets (4 to 6) it hit in 5 of 7 runs. Three runs are a strong hint, not a proof |
 | Run 1 | No access violation. The log ends in the middle of normal activity (no shutdown lines). The process ended with no Wine dialog. Adam saw a silent exit and the game started again (the loop started run 2). Cause of the abrupt end: unknown |
+| Run 3 | Same crash as run 2 at `+0x667BA5` (read of `0x10`, same frames), dialog sent by Adam. The log ends after it |
 | Run 2 | A different crash: read fault at `ForzaHorizon5.exe+0x667BA5`, `rax = 0`, read of address `0x10` (null pointer plus offset). Eleven frames, all in the EXE (`+0x67f31b`, `+0x673ef6`, `+0x6f682b`, `+0x4f7e19d`, `+0x6ff0b3`, `+0x4e2686b`, `+0x947676`, then thread entry). Same address as public report 4 and as set 4 run 3. The code bytes around it look like obfuscated code (junk bytes between jumps), which fits an anti-tamper layer. Not studied further |
 | Exceptions | `c000001d`: 277948 (run 1) and 331173 (run 2) |
 
-Meaning: with the native `concrt140.dll`, crash 1 did not appear in 2 runs, but the game still ends. This supports the hypothesis that Wine's `concrt140` causes crash 1. It does not fix the game: a second fault (a null pointer read) and an abrupt exit remain. Run 3 was still running when this was written.
+Meaning: with the native `concrt140.dll`, crash 1 did not appear in 2 runs, but the game still ends. This supports the hypothesis that Wine's `concrt140` causes crash 1. It does not fix the game: a second fault (a null pointer read) and an abrupt exit remain. Runs 2 and 3 crash at `+0x667BA5` with the same backtrace. Public report 4 (section 5.2) says that a GPU device spoof avoided this exact fault. The spoof reaches the game (set 6 test). So the next test is the native `concrt140.dll` together with the GPU spoof.
 
-Log files (gitignored): `logs/set7-run1.log`, `logs/set7-run2.log`, `logs/set7-run3.log`, `logs/stuck/set7-run1-stuck-dialog.log`. Crash file: evidence/private/fh5-crash-backtrace-set7-run2.txt.
+Log files (gitignored): `logs/set7-run1.log`, `logs/set7-run2.log`, `logs/set7-run3.log`, `logs/stuck/set7-run1-stuck-dialog.log`. Crash files: evidence/private/fh5-crash-backtrace-set7-run2.txt and `-run3.txt`.
 
 Check of the `concrt140.dll` copies on this Mac (05/11/2026, hash and header only):
 
@@ -341,6 +342,8 @@ Update 05/11/2026 (run set 3): with the original `d3d12.dll`, FH5 starts and run
 Update 05/11/2026 (run set 4): with Steam running, FH5 runs into game code and crashes there. Rating stays "possible", but the crash is not explained yet. The reports 1 and 2 of section 5.1 said that launch fails. Here launch works and the failure moves to a game-code crash.
 
 Update 05/11/2026 (run set 5): the game-code crash at `+0x4f77cb0` happened in 2 of 3 runs with a GPU spoof on the command line. Run 3 passed it and reached the start screen (WebView2 loaded). The rating moves toward "possible" with more confidence: the game can run past the fault. No patch work.
+
+Update 05/11/2026 (run set 7): with the native `concrt140.dll`, the `+0x4f77cb0` crash is gone in 3 of 3 runs. Two runs crash at `+0x667BA5` (null pointer read, public report 4 address), one run ends abruptly. The rating stays "possible" and the evidence improves: two named faults, one with a likely Wine cause and one with a reported GPU-spoof fix.
 
 Rating: possible.
 
