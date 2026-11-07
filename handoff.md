@@ -52,7 +52,7 @@ Updated: 07/11/2026.
 - Ran set 13 (one debug run with file, HTTP and socket channels). Orderly shutdown, no fault.
 - Steam launch (sets 14 and 15): the game waits for a Steam license agreement; Adam accepted. Recorded the loading screen and a third-party report (research.md section 5.7).
 - Phase 5 (05/11/2026 to 06/11/2026): `proxy/` code written and committed in steps. Set 18 ran the proxy in the bottle: run1, run1b (forwarder exports crashed), run1c (thunks, clamp off), run2 (clamp on), run3 control (no proxy). Temporary changes (one DLL in the game folder, one registry value, `apd12.dll` in `system32`) were all removed afterwards.
-- Set 19 (07/11/2026): installed the proxy again, Adam pressed Play and START. Three runs (clamp off, clamp on, clamp on with debug channels). Found the repeated Xbox device sign-in requests (research.md section 3). Restored the state afterwards (D-022).
+- Set 20 (08/11/2026): found that the game holds `ClockSkew.json` open (lsof), moved it aside with Adam's approval, the freeze did not happen, the game crashed at `+0x92df62`. Set 19 (07/11/2026): installed the proxy again, Adam pressed Play and START. Three runs (clamp off, clamp on, clamp on with debug channels). Found the repeated Xbox device sign-in requests (research.md section 3). Restored the state afterwards (D-022).
 - Changed nothing in the bottle, CrossOver, Steam, the game folder or the FH4 repo. Only read-only commands ran (find, grep, stat, shasum).
 
 ## 5. Failed attempts
@@ -64,8 +64,8 @@ Updated: 07/11/2026.
 
 ## 6. Next steps
 
-1. Best lead (set 19): after each Xbox device sign-in reply the game fails to save `ClockSkew.json` (game folder) with a sharing violation, 207 of 208 tries, then asks for a device token again. Next run: while the game is frozen, run `lsof` on that file to see which process holds it. Details and steps in task_today.md. Press nothing in the game without Adam.
-2. Then, each with Adam's approval: a run with `+server,+file` and a size guard, `ClockSkew.json` moved aside (backup first), a proxy shim that opens the file with write sharing, or a CodeWeavers report (Adam sends it). Descriptor and blend fixes stay on hold.
+1. Set 20: with `ClockSkew.json` moved aside (D-023) the game passed the loading freeze, then crashed at `ForzaHorizon5.exe+0x92df62` (null write, probably a deliberate abort) after a second sign-in. Next: read-only study of that crash site, then a repeat run with debug channels (task_today.md). Press nothing in the game without Adam.
+2. Each with Adam's approval: the repeat run, a proxy shim that opens `ClockSkew.json` with write sharing if the freeze comes back, public report search, or a CodeWeavers report (Adam sends it). Descriptor and blend fixes stay on hold.
 3. Settings that matter: native `concrt140.dll` (registry override), the GPU spoof (Steam started with `D3DM_*` variables, not permanent), the Steam license agreement accepted.
 4. Open approvals: permanent settings, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
 5. Local logs in logs/ use about 8.5 GB (set 19 added 0.35 GB). `logs/set19/screen1.png` shows a desktop sticky note that looks like a password: ask Adam if he wants it deleted. Delete old logs only with Adam's approval.

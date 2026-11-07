@@ -517,7 +517,20 @@ Run set 20 ran on 07/11/2026 (23:52 to 23:59). Adam approved ("Yes, run it"). No
 
 Meaning: the game opens `ClockSkew.json` for reading and keeps that handle open for at least 3.5 minutes, through the loading freeze. The write open that the game tries after each device sign-in reply asks for write access, and a read handle with `FILE_SHARE_READ` only denies it. This agrees with the 207 sharing violations of set 19. It also shows that the freeze does not need the proxy. Why the game does not close the read handle is open: the game may leak it, or the close may not reach Wine. Not proven that the held handle causes the sign-in repeat.
 
-Next (needs Adam's approval): copy `ClockSkew.json` to `evidence/private/`, move it aside in the game folder, and run again. Without the file, the game cannot read it, so no read handle stays open and the write can work.
+Run 2 of set 20 (08/11/2026, 00:00 to 00:08, approved by Adam: "Yes, move it"): `ClockSkew.json` was copied to `evidence/private/ClockSkew.json.set20backup` (SHA-256 starts `618860b1`) and moved aside in the game folder as `ClockSkew.json.aside_07112026`. Same plain setup (no proxy). Result:
+
+| Item | Value | Status |
+|---|---|---|
+| New `ClockSkew.json` | The game created it at 00:02 with `{"Skew":"-5005730"}` (the old file had -1350170). The first write worked. The game held it open for read and write (descriptor mode `u`) | Proven (ls, cat, lsof) |
+| Network during the run | 0 connections at 00:05. In the frozen runs there were 1 to 2 | Proven (lsof) |
+| CPU | About 110%. In the frozen runs about 220% | Proven (ps) |
+| After START and sign-in | Adam saw a blurred screen, pressed Enter, and the start page asked him to sign in again. The game then crashed. So the "LOADING... PLEASE WAIT" freeze did not happen in this run | Adam's report |
+| Crash | `page fault on write access to 0x0000000000000000` at `ForzaHorizon5.exe+0x92df62` (copy of Adam's backtrace text: `evidence/private/backtrace-set20-run2.txt`, gitignored). Callers: `+0x5343203`, `+0x10f4787`, `+0x10f4d94`. 1224 modules loaded | Proven (backtrace) |
+| Code at the crash site | A small function: it calls `+0x9e8050`, then runs `movq %rax, 0x0`, a store to the absolute address 0. The next function has the same shape. A store to address 0 right after a call matches a deliberate abort in the game. Not proven | Read-only `llvm-objdump` |
+
+Meaning: moving `ClockSkew.json` aside removed the freeze in one run. That supports the failed-save lead, but one run is not proof (the freeze could also depend on timing or on the sign-in state). The game now gets further and ends in a new crash site, not the sites of sets 4 to 8 (`+0x4f77cb0`, `+0x667BA5`). The crash happens after Adam signed in a second time on the start page. The game seems to abort itself. The next step is to find why: the function at `+0x9e8050` and the callers can show the condition. A second run would show if the result repeats.
+
+State after run 2: Steam and the bottle stopped. `ClockSkew.json` in the game folder is the new file. The old one is `ClockSkew.json.aside_07112026`. Nothing else is installed. To undo: stop the game and rename the old file back (the game has then to lose its new file first: move the new one to `ClockSkew.json.new_08112026`).
 
 ## 5. External findings (Phase 4)
 
