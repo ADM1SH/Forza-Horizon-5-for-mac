@@ -505,6 +505,20 @@ State after the runs (restored on 07/11/2026, late evening): no `d3d12.dll` in t
 
 Log files (gitignored): `logs/set19/`.
 
+### Run set 20 (plain launch, no proxy, `lsof` on `ClockSkew.json` during the freeze)
+
+Run set 20 ran on 07/11/2026 (23:52 to 23:59). Adam approved ("Yes, run it"). No proxy file, no `apd12.dll`, no registry override: the original `d3d12.dll` (`02aa6734`) in CrossOver. Steam started in the bottle with the Intel Arc identity. Adam pressed Play and START. A read-only watcher listed every 10 seconds which host process holds `ClockSkew.json` open (`logs/set20/lsof.log`, gitignored).
+
+| Item | Value | Status |
+|---|---|---|
+| Holders before the game starts | 0 | Proven (lsof) |
+| Holders from about 23:55:40 until 23:59:03 (21 samples in a row) | 2: the game process (file descriptor 313, read only) and `wineserver` (read only, 19 bytes) | Proven (lsof) |
+| Game run time at the last sample | 4 min 43 s. CPU about 218%, memory 1.4 GB | Proven (ps) |
+
+Meaning: the game opens `ClockSkew.json` for reading and keeps that handle open for at least 3.5 minutes, through the loading freeze. The write open that the game tries after each device sign-in reply asks for write access, and a read handle with `FILE_SHARE_READ` only denies it. This agrees with the 207 sharing violations of set 19. It also shows that the freeze does not need the proxy. Why the game does not close the read handle is open: the game may leak it, or the close may not reach Wine. Not proven that the held handle causes the sign-in repeat.
+
+Next (needs Adam's approval): copy `ClockSkew.json` to `evidence/private/`, move it aside in the game folder, and run again. Without the file, the game cannot read it, so no read handle stays open and the write can work.
+
 ## 5. External findings (Phase 4)
 
 Access date for all sources: 05/11/2026.
