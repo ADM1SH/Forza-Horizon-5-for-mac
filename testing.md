@@ -27,5 +27,6 @@ No code exists yet. These are the research checks.
 - [x] Hook call count is above zero with `FH5PX_CLAMP=0` (set 18 run 1c: about 211,700 calls in 1200 s).
 
 - [x] Game reaches the title screen through Steam with CrossOver 26.3 and D3DMetal 4.0b3, without the proxy (set 18 control run, 06/11/2026).
-- [ ] START pressed and free roam reached (needs Adam).
+- [x] START pressed with the proxy, clamp off and clamp on (set 19, 07/11/2026). Result: frozen "LOADING... PLEASE WAIT" in both. Free roam not reached.
+- [ ] Free roam reached (blocked by the loading freeze).
 - [ ] Controller works in the game (needs Adam).

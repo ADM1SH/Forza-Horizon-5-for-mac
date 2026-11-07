@@ -442,6 +442,53 @@ Confidence: high that the class is a game-code runtime crash. Unknown: the root 
 
 Prior (from public reports, not local evidence): see section 5.
 
+### Run set 19 (proxy installed, START pressed, clamp off and on, then a debug run)
+
+Run set 19 ran on 07/11/2026 (22:56 to 23:45, Malaysia time). Adam approved ("go") and pressed START himself. All runs: Steam started in the bottle with the Intel Arc identity (as in set 16), the proxy from set 18 installed (`d3d12.dll` in the game folder, `apd12.dll` in the bottle `system32`, registry value `d3d12` = `native,builtin`), `FH5PX_LOG` set. The `-applaunch` requests from my shell did nothing in this set (Steam was logged in, but the Steam log shows no launch). Adam pressed Play in the Steam window instead.
+
+Two environment facts from this set:
+- The original `d3d12.dll` in CrossOver's `lib64/apple_gptk/wine/x86_64-windows` (hash `02aa6734`) had been replaced by the FH4 proxy (hash `f3038fdc`) on 07/11/2026 at 15:41. Adam confirmed that he ran an FH4 patch. He chose "Restore original". The original was copied back before the runs (D-022).
+- `wineserver -k` from my shell did not stop the bottle. The call needs `WINEPREFIX` set to the bottle path. With it, the bottle stops. So the first "clamp on" restart handed the request to the old Steam, which still had `FH5PX_CLAMP=0`. I stopped Steam properly and started it again before the clamp-on run.
+
+| Run | Clamp | Result after START |
+|---|---|---|
+| A | off (`FH5PX_CLAMP=0`) | "LOADING... PLEASE WAIT" with a frozen spinner for the whole 13 minutes that I watched (game run time 14 min 58 s, title screen at about 1 min 47 s). About 163,000 hook calls, no crash |
+| B | on (proxy log: clamp 1, the first 3 calls changed 2 fields) | Same freeze. Checked at 4 min 45 s after the title screen. Same CPU and memory |
+| C | on, with `+timestamp,+process,+winhttp,+winsock,+file,err+all` | Same freeze for more than 3 minutes. The log is 343 MB (gitignored, can hold account tokens, never commit) |
+
+Facts for all three runs:
+
+| Item | Value | Status |
+|---|---|---|
+| What Adam sees | The background image and the music keep running. Only the "LOADING... PLEASE WAIT" text and spinner are frozen | Adam's report |
+| Game process | About 210% to 225% CPU, memory 1.1 to 1.4 GB and flat. It does not load anything new | Proven (ps, every few minutes) |
+| Memory counter | The game still reads about 150 GB against 24 GiB of RAM, with `cb` = 72. The log prints the value before the clamp | Proven (proxy log) |
+| Network at the freeze | One or two open HTTPS connections (checked with `lsof`). No new ones open | Proven |
+| Clamp effect | None seen. Clamp off and clamp on freeze the same way | Proven (A and B) |
+
+What the debug log of run C shows after the title screen (log time 6800 s and later):
+
+| Item | Value |
+|---|---|
+| `POST /device/authenticate` to `device.auth.xboxlive.com` | 198 times in about 3.7 minutes (first at 6801.9 s, last at 7025.3 s), about one per second |
+| HTTP status of all 219 responses after 6800 s | 200 for every one. No error, no timeout |
+| User sign-in | Once each: `/authorize`, `/authenticate` and `/oauth20_token.srf`. Also one `sisu.xboxlive.com` (2 connects) and one `login.live.com` |
+| Other requests | `GET /titles/current/endpoints` once, `ListQosServersForTitle` once, `ListBuildSummariesV2` twice, 10 telemetry posts, 3 `/collect/v1`, 13 connects to `playfabapi.com` |
+| Wine warnings | `BCryptCreateHash ignoring object` (3 times). `RoGetActivationFactory` failed for two classes: a `Windows.Internal.Security` web authentication class and `Windows.UI.Notifications.ToastNotificationManager`. Also 2 COM classes not registered |
+
+Meaning:
+- The memory clamp is not the cause of the freeze. This answers the open question of set 18. The proxy and the clamp do not change the freeze.
+- The game is not hung. It draws, plays music and uses CPU. Only the loading step does not finish.
+- The Xbox device sign-in is repeated again and again, although the server answers 200 every time. So the game does not accept the answer, or it asks again for another reason. Why is not proven. The reply bodies were not read, because they can hold tokens.
+- Candidates, each unproven: a signing or hash step that Wine does not support (the `BCryptCreateHash` warning, the web authentication class), a clock or time-window check, or a different failure in the game after the answer.
+- The `GLOBALROOT` file opens in the log (system DLL paths, about once per second) look like a module scan by the game and are probably unrelated.
+
+Next, each needing approval: read the structure of one `/device/authenticate` reply (field names only, no token values), find which Wine feature the repeat depends on (for example `+ncrypt,+bcrypt,+crypt`), and compare with public reports of Xbox sign-in loops in Wine.
+
+State after the runs (restored on 07/11/2026, late evening): no `d3d12.dll` in the game folder, no `d3d12` registry value (the `concrt140` value is still there), no `apd12.dll` in the bottle `system32`, no Wine process running. The CrossOver `apple_gptk` `d3d12.dll` has hash `02aa6734` (the original). Your FH4 proxy copy is still there as `d3d12.dll.fh4proxy_05112026`.
+
+Log files (gitignored): `logs/set19/`.
+
 ## 5. External findings (Phase 4)
 
 Access date for all sources: 05/11/2026.
@@ -567,6 +614,8 @@ Reasons:
 - Report 4 shows FH5 reaching the rendering stage on the same Mac class. It used a patched stack (Highball engine build, GPU spoof, stand-in WebView2 file) and D3DMetal 3 or 4. So launch is not always blocked, but not on stock CrossOver.
 - The rendering fault in report 4 looks like the FH4 geometry class. The FH4 proxy has generic logic for it.
 - The local install already has D3DMetal 4.0b3 and the FH4 patches in the bottle. So a test needs no new install, but the baseline is not stock.
+
+Update 07/11/2026 (run set 19): with the proxy, clamp off and clamp on, the game freezes at "LOADING... PLEASE WAIT" after START. The debug log shows 198 repeated Xbox device sign-in requests, all answered with HTTP 200. The memory clamp is not the cause. The rating stays "possible". The new lead is the Xbox sign-in loop.
 
 Missing evidence (why not "likely"):
 - No local launch log. Reports 1 and 2 say launch fails with CrossOver 26.0 and 25.0.

@@ -70,7 +70,7 @@ Recommendation: A first. B only if A shows that the patched `kernelbase.dll` blo
 
 After Phase 4 and the Phase 2 and 3 results, show the summary and wait for approval before any patch work.
 
-## Phase 5: our own proxy (route c, MIT) (steps 1 to 3 done, step 4 open)
+## Phase 5: our own proxy (route c, MIT) (steps 1 to 4 done on 07/11/2026, step 5 open)
 
 Why: the game reads process memory counters in its own threads (research.md section 3: 18 to 25 `ProcessVmCounters` queries per run, one right before the quit), and the game's own report showed 149 GB against a 24 GiB limit. A third-party report (section 5.7) says that a clamp of this counter, a descriptor size fix and an unwind guard are needed later. We write our own code. No third-party code is copied (decisions.md D-019).
 
@@ -90,5 +90,9 @@ Steps (each needs Adam's approval before it runs):
 2. [x] Read the EXE import table, then write `d3d12.def`, `d3d12_proxy.c` and `build.sh`. Done 05/11/2026. Findings: the EXE imports `K32GetProcessMemoryInfo`, `GlobalMemoryStatusEx`, `GlobalMemoryStatus` and `GetPhysicallyInstalledSystemMemory` from `KERNEL32.dll`, `D3D12SerializeVersionedRootSignature` and ordinal 101 from `d3d12.dll`. The build is `-Werror` clean, imports only `KERNEL32.dll`, has 12 forwarders and a `.reloc` section. Not run anywhere. The only checks are the compiler, `objdump` and `static_assert`s on the counter struct sizes and offset. There is no test for the struct size cases. At runtime the first three calls log `cb`.
 3. [x] Install and test. Done 05/11/2026 to 06/11/2026 as set 18 (research.md section 3). Result: the proxy loads, the hook installs and runs (about 175 calls per second), forwarder exports crash the game, so the proxy now uses jump thunks (decisions.md, D-020). The game reaches the title screen in about 107 s with the clamp on, with the clamp off, and without the proxy (control run). Nobody pressed START, so the stall that sets 14 to 17 showed after the title screen was not tested. The state was restored afterwards (D-021).
 4. Next, each needing approval: (a) Adam presses START and reports what happens (free roam, controller, `0x800705AA`). (b) With the proxy installed, Adam presses START, once with `FH5PX_CLAMP=0` and once with the clamp on, and we compare how long the loading screen after START lasts (sets 14 to 17 stalled there). (c) Only if the game then reaches `0x800705AA` or visual faults, plan the descriptor size fix and the blend fix from API documentation and our logs, not from third-party code. The memory clamp stays in the proxy as an experiment. It has no visible effect so far.
+
+Step 4 done on 07/11/2026 (set 19, research.md section 3): Adam pressed START with the proxy installed. Clamp off and clamp on both freeze at "LOADING... PLEASE WAIT" (the background and music run, only the spinner is frozen). The clamp is not the cause. A debug run shows 198 repeated `POST /device/authenticate` requests to the Xbox device sign-in service, all answered with HTTP 200.
+
+5. Next, each needing approval: (a) read the structure of one `/device/authenticate` reply (field names only, no token values). (b) Run with `+ncrypt,+bcrypt,+crypt` to see which Wine feature the repeat depends on. (c) Search public reports for Xbox sign-in loops in Wine. (d) Only then decide on a fix. Descriptor and blend fixes stay on hold until the game gets past this loading screen.
 
 Risks: the proxy cannot load the provider (the game has no graphics device), the patch breaks when the Wine build changes (refuse on a module check), a file in the game folder (remove to undo), and similarity to third-party code (D-019, a human review before release). The research phase rule "no patches" is lifted by Adam only for this plan.

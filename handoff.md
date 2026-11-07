@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 05/11/2026.
+Updated: 07/11/2026.
 
 ## 1. Goals
 
@@ -11,6 +11,7 @@ Updated: 05/11/2026.
 ## 2. Current state
 
 - Docs and rules are written. Git is initialised on branch main. The first commit is made on 05/11/2026. The GitHub repo `ADM1SH/Forza-Horizon-5-for-mac` is created and pushed in the same session (status in section 4).
+- Status 07/11/2026 (set 19): with our proxy installed, Adam pressed START. Clamp off and clamp on both freeze at "LOADING... PLEASE WAIT" (background and music run, only the spinner is frozen). The memory clamp is not the cause. The debug log shows 198 repeated `POST /device/authenticate` requests to the Xbox device sign-in service, all HTTP 200. Everything is restored (D-022): no proxy file in the game folder or bottle, no `d3d12` registry value, original `d3d12.dll` (`02aa6734`) in the CrossOver `apple_gptk` folder. The FH4 patch that Adam ran on 07/11/2026 at 15:41 is undone by this.
 - Status 06/11/2026 (written around 02:00 while Adam slept): the game reaches the title screen through Steam in about 107 s with plain CrossOver 26.3 and D3DMetal 4.0b3, also without our proxy (set 18 control run). Nobody pressed START in set 18. The long stall of sets 14 to 17 comes after the title screen, so set 18 did not test it. Free roam, the controller and the `0x800705AA` error are untested (research.md section 3, set 18).
 - FH5 is fully installed (StateFlags 4, buildid 21856128). It sits in the Steam library folder on the external SSD (`SteamGames`).
 - EXE: `ForzaHorizon5.exe`, 176231056 bytes, SHA-256 `eb71ee4a6ae092b854c58751342c6d06a4d9bc00f089b81e72b073d4867b76b7`.
@@ -51,18 +52,20 @@ Updated: 05/11/2026.
 - Ran set 13 (one debug run with file, HTTP and socket channels). Orderly shutdown, no fault.
 - Steam launch (sets 14 and 15): the game waits for a Steam license agreement; Adam accepted. Recorded the loading screen and a third-party report (research.md section 5.7).
 - Phase 5 (05/11/2026 to 06/11/2026): `proxy/` code written and committed in steps. Set 18 ran the proxy in the bottle: run1, run1b (forwarder exports crashed), run1c (thunks, clamp off), run2 (clamp on), run3 control (no proxy). Temporary changes (one DLL in the game folder, one registry value, `apd12.dll` in `system32`) were all removed afterwards.
+- Set 19 (07/11/2026): installed the proxy again, Adam pressed Play and START. Three runs (clamp off, clamp on, clamp on with debug channels). Found the repeated Xbox device sign-in requests (research.md section 3). Restored the state afterwards (D-022).
 - Changed nothing in the bottle, CrossOver, Steam, the game folder or the FH4 repo. Only read-only commands ran (find, grep, stat, shasum).
 
 ## 5. Failed attempts
 
 - None. Some pages did not load for the Phase 4 agents (CodeWeavers compatibility page, Wine bugzilla, ProtonDB body returned 403 or empty). Re-read them in a browser.
 - Forwarder exports in the proxy `.def` (set 18 run1 and run1b): Wine did not find `apd12`, then the game ran the forwarder entry as code. Replaced by jump thunks (D-020).
-- The memory clamp could not be judged: no set 18 run went past the title screen.
+- The memory clamp did not change the freeze after START (set 19): clamp off and clamp on freeze the same way.
+- `-applaunch` from my shell did not start the game in set 19. Adam pressed Play in Steam. `wineserver -k` without `WINEPREFIX` did not stop the bottle.
 
 ## 6. Next steps
 
-1. Ask Adam to press START on the title screen and report free roam, the controller and any error. Press nothing in the game without Adam.
-2. Then test the stall after START with the proxy installed, clamp off and clamp on (implementation_plan.md Phase 5 step 4), or fix errors from free roam. Ask Adam if he pressed START in set 17. No download of third-party binaries without approval.
+1. Ask Adam to approve a read-only analysis of `logs/set19/debug_clampon.log` (gitignored, can hold tokens): the structure of one `/device/authenticate` request and reply, field names only. Press nothing in the game without Adam.
+2. If needed, one more run with `+ncrypt,+bcrypt,+crypt,+winhttp` (Adam presses Play and START, log size guard). Search public reports for Xbox sign-in loops in Wine. Descriptor and blend fixes stay on hold.
 3. Settings that matter: native `concrt140.dll` (registry override), the GPU spoof (Steam started with `D3DM_*` variables, not permanent), the Steam license agreement accepted.
 4. Open approvals: permanent settings, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
-5. Local logs in logs/ use about 8 GB (set 18 added about 0.2 GB). The watcher script for set 18 is `run18.sh` in the session scratchpad. Delete old logs only with Adam's approval.
+5. Local logs in logs/ use about 8.5 GB (set 19 added 0.35 GB). `logs/set19/screen1.png` shows a desktop sticky note that looks like a password: ask Adam if he wants it deleted. Delete old logs only with Adam's approval.
