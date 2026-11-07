@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 07/11/2026.
+Updated: 08/11/2026 (end of the night session).
 
 ## 1. Goals
 
@@ -11,6 +11,7 @@ Updated: 07/11/2026.
 ## 2. Current state
 
 - Docs and rules are written. Git is initialised on branch main. The first commit is made on 05/11/2026. The GitHub repo `ADM1SH/Forza-Horizon-5-for-mac` is created and pushed in the same session (status in section 4).
+- Machine state on 08/11/2026 at the end of the session: nothing runs (no Steam, no Wine process). No proxy file in the game folder, no `apd12.dll` in the bottle `system32`, no `d3d12` registry value (`concrt140` is still there). CrossOver `apple_gptk` `d3d12.dll` is the original (`02aa6734`). One change stays: in the game folder `ClockSkew.json` is a new file made by the game, and the old one is `ClockSkew.json.aside_07112026` (D-023, backup in `evidence/private/`). Git is clean and pushed. To start a new session: read this file, then task_today.md. Set 20 run 2 (research.md section 3) is the latest result: no loading freeze with the old `ClockSkew.json` moved aside, then a crash at `ForzaHorizon5.exe+0x92df62`.
 - Status 07/11/2026 (set 19): with our proxy installed, Adam pressed START. Clamp off and clamp on both freeze at "LOADING... PLEASE WAIT" (background and music run, only the spinner is frozen). The memory clamp is not the cause. The debug log shows 198 repeated `POST /device/authenticate` requests to the Xbox device sign-in service, all HTTP 200. After each reply the game fails to save `ClockSkew.json` (207 sharing violations). Everything is restored (D-022): no proxy file in the game folder or bottle, no `d3d12` registry value, original `d3d12.dll` (`02aa6734`) in the CrossOver `apple_gptk` folder. The FH4 patch that Adam ran on 07/11/2026 at 15:41 is undone by this.
 - Status 06/11/2026 (written around 02:00 while Adam slept): the game reaches the title screen through Steam in about 107 s with plain CrossOver 26.3 and D3DMetal 4.0b3, also without our proxy (set 18 control run). Nobody pressed START in set 18. The long stall of sets 14 to 17 comes after the title screen, so set 18 did not test it. Free roam, the controller and the `0x800705AA` error are untested (research.md section 3, set 18).
 - FH5 is fully installed (StateFlags 4, buildid 21856128). It sits in the Steam library folder on the external SSD (`SteamGames`).
@@ -68,4 +69,4 @@ Updated: 07/11/2026.
 2. Each with Adam's approval: the repeat run, a proxy shim that opens `ClockSkew.json` with write sharing if the freeze comes back, public report search, or a CodeWeavers report (Adam sends it). Descriptor and blend fixes stay on hold.
 3. Settings that matter: native `concrt140.dll` (registry override), the GPU spoof (Steam started with `D3DM_*` variables, not permanent), the Steam license agreement accepted.
 4. Open approvals: permanent settings, control game, stock D3DMetal 3.0 run, Plan B, FH4 test, an issue to the FH4 owner, a bug report to CodeWeavers (Adam sends it).
-5. Local logs in logs/ use about 8.5 GB (set 19 added 0.35 GB). `logs/set19/screen1.png` shows a desktop sticky note that looks like a password: ask Adam if he wants it deleted. Delete old logs only with Adam's approval.
+5. Local logs in logs/ use about 9.2 GB (sets 19 and 20 added about 1 GB). `logs/set19/screen1.png` shows a desktop sticky note that looks like a password: ask Adam if he wants it deleted. Delete old logs only with Adam's approval.
