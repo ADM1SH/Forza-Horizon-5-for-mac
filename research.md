@@ -476,14 +476,30 @@ What the debug log of run C shows after the title screen (log time 6800 s and la
 | Other requests | `GET /titles/current/endpoints` once, `ListQosServersForTitle` once, `ListBuildSummariesV2` twice, 10 telemetry posts, 3 `/collect/v1`, 13 connects to `playfabapi.com` |
 | Wine warnings | `BCryptCreateHash ignoring object` (3 times). `RoGetActivationFactory` failed for two classes: a `Windows.Internal.Security` web authentication class and `Windows.UI.Notifications.ToastNotificationManager`. Also 2 COM classes not registered |
 
+What the game does between two device sign-in requests (run C, one reply read in detail, names only, no token values):
+
+| Item | Value | Status |
+|---|---|---|
+| Request | `POST /device/authenticate`, JSON body of 363 bytes, headers `Content-Type`, `MS-CV` and `Signature` (a signed request) | Proven (log) |
+| Reply | HTTP 200, JSON body of 1688 bytes, headers `MS-CV`, `traceparent`, `X-XblCorrelationId` | Proven (log) |
+| Time from the end of the reply to the next request | About 14 ms, on the same thread | Proven (log) |
+| `ClockSkew.json` | In the game folder, 19 bytes, written 05/11/2026 at 21:25. It holds one field, `Skew`, with the value -1350170. The unit is unknown | Proven (file read) |
+| Reads of `ClockSkew.json` | 1 (at the start of the freeze, success) | Proven (log) |
+| Writes of `ClockSkew.json` | 207 attempts with `CREATE_ALWAYS`, `GENERIC_WRITE` and `FILE_SHARE_READ`. All 207 failed with `c0000043` (`STATUS_SHARING_VIOLATION`). Each attempt comes right after a device sign-in reply, on one thread. First attempt at 6798.6 s, last at 7049.3 s | Proven (log) |
+| Filesystem of the game folder | APFS on the external SSD (`/Volumes/SuperFastStorage`) | Proven (mount) |
+
+Meaning of the `ClockSkew.json` result: the game reads the stored clock skew once, then each reply makes it try to save a new skew value. The save always fails with a sharing violation. Then the game asks for a device token again. The name suggests the game checks the difference between the Mac clock and the server clock. This is a hypothesis: no log line proves that the failed save causes the repeat. It is the best lead, because the repeat and the failed save have the same count and timing.
+
+Why the save fails is open. The first open (read, `FILE_SHARE_READ` only) may still be open, or another handle holds the file. On Windows a read handle that is closed does not block a later write. The log has no close events for this file. The `lsof` list while the game freezes can show which process holds it.
+
 Meaning:
 - The memory clamp is not the cause of the freeze. This answers the open question of set 18. The proxy and the clamp do not change the freeze.
 - The game is not hung. It draws, plays music and uses CPU. Only the loading step does not finish.
 - The Xbox device sign-in is repeated again and again, although the server answers 200 every time. So the game does not accept the answer, or it asks again for another reason. Why is not proven. The reply bodies were not read, because they can hold tokens.
-- Candidates, each unproven: a signing or hash step that Wine does not support (the `BCryptCreateHash` warning, the web authentication class), a clock or time-window check, or a different failure in the game after the answer.
+- Candidates, each unproven: the failed `ClockSkew.json` save (best lead, see above), a signing or hash step that Wine does not support (the `BCryptCreateHash` warning, the web authentication class), a clock or time-window check, or a different failure in the game after the answer.
 - The `GLOBALROOT` file opens in the log (system DLL paths, about once per second) look like a module scan by the game and are probably unrelated.
 
-Next, each needing approval: read the structure of one `/device/authenticate` reply (field names only, no token values), find which Wine feature the repeat depends on (for example `+ncrypt,+bcrypt,+crypt`), and compare with public reports of Xbox sign-in loops in Wine.
+Next, each needing approval (also in task_today.md): (1) during a freeze, run `lsof` on `ClockSkew.json` to see which process holds it open (read-only). (2) Run once with `+server,+file` limited by a size guard, to see the handle that holds the file. (3) Move `ClockSkew.json` aside (backup first, it is a game cache file) and test again. (4) If a leaked handle is the cause, a small shim in our proxy can open the file with write sharing, or CodeWeavers gets a bug report (Adam sends it). (5) Search public reports for a "ClockSkew.json" or Xbox device sign-in loop in Wine.
 
 State after the runs (restored on 07/11/2026, late evening): no `d3d12.dll` in the game folder, no `d3d12` registry value (the `concrt140` value is still there), no `apd12.dll` in the bottle `system32`, no Wine process running. The CrossOver `apple_gptk` `d3d12.dll` has hash `02aa6734` (the original). Your FH4 proxy copy is still there as `d3d12.dll.fh4proxy_05112026`.
 
