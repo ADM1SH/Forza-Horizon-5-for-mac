@@ -1,6 +1,8 @@
 # Task for the next session
 
-Do not edit `cxbottle.conf`. Ask Adam before every run, download or file change.
+Do not edit `cxbottle.conf`. Ask Adam before every run, download or file change. The one exception is the install of 11/11/2026 (D-024).
+
+Update on 11/11/2026: the upstream fix is now installed in the bottle `Steam forza 5`, in a new app copy `/Applications/CrossOver (FH5).app` and in the SSD game folder (handoff.md section 2, D-024). It is not tested in game. The text below this block was written before that install, so "nothing is installed" is no longer true. Do the upstream fix test first (handoff.md section 6 step 0). Do not run step 2 below on this state: the upstream proxy, the `ws2_32` wrapper and the new `HB_*` and `D3DM_*` values would change the result. If Adam wants set 20 again on a clean state, list the undo steps first (handoff.md section 2) and ask.
 
 Status on 07/11/2026: with our proxy installed, Adam pressed START in set 19 (clamp off and clamp on). Both freeze at "LOADING... PLEASE WAIT" (the background and music run, only the spinner is frozen). The memory clamp is not the cause. The debug log shows the game sending `POST /device/authenticate` to the Xbox device sign-in service 198 times in about 3.7 minutes, every reply HTTP 200 (research.md section 3, set 19). Nothing is installed in the bottle or the game folder now (D-022). The CrossOver `apple_gptk` `d3d12.dll` is the original (`02aa6734`).
 

@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 08/11/2026 (end of the night session).
+Updated: 11/11/2026 (upstream fix installed in the bottle `Steam forza 5`, not tested in game).
 
 ## 1. Goals
 
@@ -10,6 +10,13 @@ Updated: 08/11/2026 (end of the night session).
 
 ## 2. Current state
 
+- Machine state on 11/11/2026 (this replaces the 08/11/2026 machine state below). Adam asked for the upstream fix `fh5-crossover-steam-fix` 1.0.1 (folder `~/Downloads/fh5-crossover-steam-fix-main`, GPL-3.0, DLLs of unverified origin) to be installed in the bottle `Steam forza 5`. It is installed. The main bottle `Steam` is not changed. Nobody has run the game since. Details:
+  - New app copy `/Applications/CrossOver (FH5).app`. Its `ntdll.dll` has the `RtlVirtualUnwind2` patch (backup `ntdll.dll.orig`). Its `apple_gptk` `d3d12.dll` is the stock file (`02aa6734`) and `apd12.dll` is the stock file with a renamed export (`32c942ed`). D3DMetal is 4.0b3. The copy still has the FH4 patched `kernelbase.dll` (`313a9d07`, D-015), so it is not a full stock baseline. It was not changed.
+  - The original `/Applications/CrossOver.app` is not changed by this install. Its `apple_gptk` `d3d12.dll` is an FH4 proxy (`f3038fdc`) since 09/11/2026 23:54, so the 08/11/2026 line below is out of date. The stock file is in the `d3d12.dll.bak_fh4_archive_*` backups.
+  - Bottle `Steam forza 5`: `system32` has `apd12.dll`, `ws2_o.dll` and the upstream `ws2_32.dll` wrapper (`9f3f8088`). `cxbottle.conf` has `HB_D3D12_REAL` and the `D3DM_*` RTX 4070 identity. In `user.reg` the section `ForzaHorizon5.exe\DllOverrides` has `d3d12=native` and `ws2_32=native,builtin` next to `concrt140`. Adam's old `concrt140` value stays. `setup.sh` skips an existing section, so these two lines were added by hand.
+  - Game folder on the SSD: the upstream proxy `d3d12.dll` (`c5d48ab9`). The main bottle `Steam` uses the same game folder. To undo this file, delete it.
+  - Launch the bottle only from `CrossOver (FH5).app`. Quit the original CrossOver first (same bundle ID).
+  - Backups: `*.orig` files in the bottle and the app copy, and `evidence/private/pre-fh5fix/` (hashes in `SHA256SUMS.txt`). The upstream `uninstall.sh` deletes the whole `ForzaHorizon5.exe\DllOverrides` section including `concrt140`. To undo by hand, remove only the two added lines.
 - Docs and rules are written. Git is initialised on branch main. The first commit is made on 05/11/2026. The GitHub repo `ADM1SH/Forza-Horizon-5-for-mac` is created and pushed in the same session (status in section 4).
 - Machine state on 08/11/2026 at the end of the session: nothing runs (no Steam, no Wine process). No proxy file in the game folder, no `apd12.dll` in the bottle `system32`, no `d3d12` registry value (`concrt140` is still there). CrossOver `apple_gptk` `d3d12.dll` is the original (`02aa6734`). One change stays: in the game folder `ClockSkew.json` is a new file made by the game, and the old one is `ClockSkew.json.aside_07112026` (D-023, backup in `evidence/private/`). Git is clean and pushed. To start a new session: read this file, then task_today.md. Set 20 run 2 (research.md section 3) is the latest result: no loading freeze with the old `ClockSkew.json` moved aside, then a crash at `ForzaHorizon5.exe+0x92df62`.
 - Status 07/11/2026 (set 19): with our proxy installed, Adam pressed START. Clamp off and clamp on both freeze at "LOADING... PLEASE WAIT" (background and music run, only the spinner is frozen). The memory clamp is not the cause. The debug log shows 198 repeated `POST /device/authenticate` requests to the Xbox device sign-in service, all HTTP 200. After each reply the game fails to save `ClockSkew.json` (207 sharing violations). Everything is restored (D-022): no proxy file in the game folder or bottle, no `d3d12` registry value, original `d3d12.dll` (`02aa6734`) in the CrossOver `apple_gptk` folder. The FH4 patch that Adam ran on 07/11/2026 at 15:41 is undone by this.
@@ -54,7 +61,8 @@ Updated: 08/11/2026 (end of the night session).
 - Steam launch (sets 14 and 15): the game waits for a Steam license agreement; Adam accepted. Recorded the loading screen and a third-party report (research.md section 5.7).
 - Phase 5 (05/11/2026 to 06/11/2026): `proxy/` code written and committed in steps. Set 18 ran the proxy in the bottle: run1, run1b (forwarder exports crashed), run1c (thunks, clamp off), run2 (clamp on), run3 control (no proxy). Temporary changes (one DLL in the game folder, one registry value, `apd12.dll` in `system32`) were all removed afterwards.
 - Set 20 (08/11/2026): found that the game holds `ClockSkew.json` open (lsof), moved it aside with Adam's approval, the freeze did not happen, the game crashed at `+0x92df62`. Set 19 (07/11/2026): installed the proxy again, Adam pressed Play and START. Three runs (clamp off, clamp on, clamp on with debug channels). Found the repeated Xbox device sign-in requests (research.md section 3). Restored the state afterwards (D-022).
-- Changed nothing in the bottle, CrossOver, Steam, the game folder or the FH4 repo. Only read-only commands ran (find, grep, stat, shasum).
+- Until 08/11/2026 the phase changed nothing permanent in the bottle, CrossOver, Steam, the game folder or the FH4 repo (the later states are in section 2).
+- 11/11/2026: Adam asked for the upstream fix to be installed (this overrides the research-only rule in CLAUDE.md for this action). Read the whole upstream repo. Ran `setup.sh --check` (0 warnings), `make-copies.sh --no-bottle-copy`, `setup.sh` on the copy and `Steam forza 5`, `install-game.sh` with the SSD game path. Restored the stock `d3d12.dll` in the app copy only. Added the two `user.reg` values by hand. Checks passed: ntdll patch present in the copy only, original ntdll unchanged (`6dff64c0`), main bottle `Steam` has no file newer than the marker. Nothing is committed.
 
 ## 5. Failed attempts
 
@@ -65,6 +73,7 @@ Updated: 08/11/2026 (end of the night session).
 
 ## 6. Next steps
 
+0. Test the upstream fix (Adam presses Play). Quit CrossOver, open `CrossOver (FH5).app`, start Steam in `Steam forza 5`, then start FH5. Click Ignore Warning on the FH302 message. Expect a long first start (shader build). The `ClockSkew.json` freeze of sets 19 and 20 is not an upstream topic, so it can come back. Logs: add `"HB_DEBUG" = "1"` to the bottle `[EnvironmentVariables]`. Results go to research.md.
 1. Set 20: with `ClockSkew.json` moved aside (D-023) the game passed the loading freeze, then crashed at `ForzaHorizon5.exe+0x92df62` (null write, probably a deliberate abort) after a second sign-in. Next: read-only study of that crash site, then a repeat run with debug channels (task_today.md). Press nothing in the game without Adam.
 2. Each with Adam's approval: the repeat run, a proxy shim that opens `ClockSkew.json` with write sharing if the freeze comes back, public report search, or a CodeWeavers report (Adam sends it). Descriptor and blend fixes stay on hold.
 3. Settings that matter: native `concrt140.dll` (registry override), the GPU spoof (Steam started with `D3DM_*` variables, not permanent), the Steam license agreement accepted.
