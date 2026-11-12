@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 11/11/2026 (upstream fix installed in the bottle `Steam forza 5`, not tested in game).
+Updated: 12/11/2026 (upstream fix installed in the bottle `Steam forza 5`, not tested in game. Install guides added).
 
 ## 1. Goals
 
@@ -62,7 +62,8 @@ Updated: 11/11/2026 (upstream fix installed in the bottle `Steam forza 5`, not t
 - Phase 5 (05/11/2026 to 06/11/2026): `proxy/` code written and committed in steps. Set 18 ran the proxy in the bottle: run1, run1b (forwarder exports crashed), run1c (thunks, clamp off), run2 (clamp on), run3 control (no proxy). Temporary changes (one DLL in the game folder, one registry value, `apd12.dll` in `system32`) were all removed afterwards.
 - Set 20 (08/11/2026): found that the game holds `ClockSkew.json` open (lsof), moved it aside with Adam's approval, the freeze did not happen, the game crashed at `+0x92df62`. Set 19 (07/11/2026): installed the proxy again, Adam pressed Play and START. Three runs (clamp off, clamp on, clamp on with debug channels). Found the repeated Xbox device sign-in requests (research.md section 3). Restored the state afterwards (D-022).
 - Until 08/11/2026 the phase changed nothing permanent in the bottle, CrossOver, Steam, the game folder or the FH4 repo (the later states are in section 2).
-- 11/11/2026: Adam asked for the upstream fix to be installed (this overrides the research-only rule in CLAUDE.md for this action). Read the whole upstream repo. Ran `setup.sh --check` (0 warnings), `make-copies.sh --no-bottle-copy`, `setup.sh` on the copy and `Steam forza 5`, `install-game.sh` with the SSD game path. Restored the stock `d3d12.dll` in the app copy only. Added the two `user.reg` values by hand. Checks passed: ntdll patch present in the copy only, original ntdll unchanged (`6dff64c0`), main bottle `Steam` has no file newer than the marker. Nothing is committed.
+- 11/11/2026: Adam asked for the upstream fix to be installed (this overrides the research-only rule in CLAUDE.md for this action). Read the whole upstream repo. Ran `setup.sh --check` (0 warnings), `make-copies.sh --no-bottle-copy`, `setup.sh` on the copy and `Steam forza 5`, `install-game.sh` with the SSD game path. Restored the stock `d3d12.dll` in the app copy only. Added the two `user.reg` values by hand. Checks passed: ntdll patch present in the copy only, original ntdll unchanged (`6dff64c0`), main bottle `Steam` has no file newer than the marker. The doc updates were committed (`0a14f01`).
+- 12/11/2026: Adam asked for the docs to match the real state, two install guides, a commit and a push. Added INSTALL_MANUAL.md and INSTALL_AI.md (D-025). Updated README.md, research.md (section 4 install entry, section 6, section 7), implementation_plan.md (Phase 6), testing.md, bugs.md (B-001, B-002), prd.md, audit.md and decisions.md. A regex scan found no secrets, SteamIDs, home paths or em dashes. The game was not started, so no doc claims that it works.
 
 ## 5. Failed attempts
 

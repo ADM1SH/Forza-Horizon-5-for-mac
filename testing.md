@@ -1,6 +1,6 @@
 # Testing
 
-No code exists yet. These are the research checks.
+These are the research checks, the proxy code checks and the install checks of the third-party fix.
 
 ## Phase 0
 
@@ -30,3 +30,19 @@ No code exists yet. These are the research checks.
 - [x] START pressed with the proxy, clamp off and clamp on (set 19, 07/11/2026). Result: frozen "LOADING... PLEASE WAIT" in both. Free roam not reached.
 - [ ] Free roam reached (blocked by the loading freeze).
 - [ ] Controller works in the game (needs Adam).
+
+## Third-party fix install (11/11/2026)
+
+- [x] `setup.sh --check` on the original app prints 0 warnings.
+- [x] The ntdll patch is in the app copy (`patch_unwind_cx.pl --check` exits 3).
+- [x] The original app `ntdll.dll` is unchanged (SHA-256 starts `6dff64c0`).
+- [x] The game folder `d3d12.dll` has SHA-256 `c5d48ab9...`.
+- [x] The bottle has `apd12.dll`, `ws2_o.dll`, the wrapper `ws2_32.dll` and `ws2_32.dll.orig`.
+- [x] `cxbottle.conf` differs from its backup only in `[EnvironmentVariables]`. `user.reg` differs by exactly 2 added lines.
+- [x] The main bottle `Steam` has no file newer than the marker made before the install.
+- [ ] Restore from the backups works (not run).
+- [ ] The game starts from `CrossOver (FH5).app` and reaches the title screen (needs Adam).
+- [ ] START passes the loading screen (the `ClockSkew.json` freeze of sets 19 and 20).
+- [ ] Free roam is reached and `0x800705AA` does not appear in 30 minutes.
+- [ ] Black or missing objects are gone.
+- [ ] Online play works (Horizon Life or Horizon Open).

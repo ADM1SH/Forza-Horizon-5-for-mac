@@ -17,6 +17,7 @@ Mac players with a Steam copy of FH5 and CrossOver. Test machine: M4 Pro, 24 GB 
 
 - A diagnosis tool or log guide that reads the Wine and D3DMetal logs.
 - In-process fixes only if evidence shows a cause. Examples: a proxy `d3d12.dll`, an exception handler.
+- Install guides for a third-party fix (INSTALL_MANUAL.md and INSTALL_AI.md, 12/11/2026). They link to the fix and copy none of its code.
 
 ## Out of scope
 

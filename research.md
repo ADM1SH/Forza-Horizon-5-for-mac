@@ -532,6 +532,26 @@ Meaning: moving `ClockSkew.json` aside removed the freeze in one run. That suppo
 
 State after run 2: Steam and the bottle stopped. `ClockSkew.json` in the game folder is the new file. The old one is `ClockSkew.json.aside_07112026`. Nothing else is installed. To undo: stop the game and rename the old file back (the game has then to lose its new file first: move the new one to `ClockSkew.json.new_08112026`).
 
+### Install of the upstream fix (11/11/2026, no game run yet)
+
+Adam asked to install `fh5-crossover-steam-fix` 1.0.1 (the scripts, with the third-party `d3d12.dll` and `ws2_32.dll` of `xvferxedd/fh5-d3dmetal-fix`) in the bottle `Steam forza 5` only (decisions.md, D-024). Steps: `setup.sh --check`, `make-copies.sh --no-bottle-copy`, `setup.sh`, two registry lines by hand, `install-game.sh` with the SSD game path. Guides: INSTALL_MANUAL.md and INSTALL_AI.md.
+
+| Item | Value | Status |
+|---|---|---|
+| Check before the install | `setup.sh --check` on the original app: ntdll patchable (hook RVA `0x38120`), D3DMetal 4.0b3, `ws2_32` wrapper 134 of 134 exports with 0 problems, 0 warnings | Proven (script output) |
+| New app copy | `/Applications/CrossOver (FH5).app`, 1.0 GB. Its `ntdll.dll` has the unwind patch (`patch_unwind_cx.pl --check` exits 3). Backup `ntdll.dll.orig` | Proven |
+| Original `CrossOver.app` | `ntdll.dll` unchanged (SHA-256 starts `6dff64c0`). Its `apple_gptk` `d3d12.dll` is the FH4 proxy (`f3038fdc`) since 09/11/2026 23:54. Section 1 and D-022 describe an older state | Proven (shasum, ls) |
+| Stock files in the copy | `d3d12.dll` is the stock file (`02aa6734`), restored from a backup in the copy only. `apd12.dll` (`32c942ed`) equals the stock file with a renamed export | Proven (a renamed scratch copy gives the same hash) |
+| Bottle `Steam forza 5` | `system32` has `apd12.dll`, `ws2_o.dll` and the wrapper `ws2_32.dll` (`9f3f8088`, backup `ws2_32.dll.orig`). `cxbottle.conf` gained `HB_D3D12_REAL` and the `D3DM_` identity (vendor 4318, device 10118, "NVIDIA GeForce RTX 4070"). The diff against the backup shows only the `[EnvironmentVariables]` section. `CX_GRAPHICS_BACKEND=d3dmetal` was already set (section 1 says it was not set on 05/11/2026) | Proven (diff) |
+| Registry override | The section `ForzaHorizon5.exe\DllOverrides` held only `concrt140`. `setup.sh` prints "already present" and skips an existing section, so `d3d12=native` and `ws2_32=native,builtin` were added by hand. The diff against the backup is exactly these 2 lines | Proven (diff) |
+| Game folder on the SSD | Holds the upstream proxy `d3d12.dll` (`c5d48ab9`). The main bottle `Steam` lists the same library folder, so it sees the proxy too | Proven (shasum, `libraryfolders.vdf`) |
+| Main bottle `Steam` | No file newer than a marker file made before the install. Mtimes of `user.reg`, `system.reg` and `cxbottle.conf` are the same | Proven (find, stat) |
+| Backups | `evidence/private/pre-fh5fix/` (gitignored) and the `.orig` files. The restore was not run | Proven that the files exist. Restore not tested |
+| Source check of the DLLs | The scripts were read in full. The DLL strings hold one URL (a toolchain tag). The C source was scanned for network and process calls: none, apart from `LoadLibrary` of the renamed DLLs. The `ws2_32` wrapper only forwards calls, forces success on two socket errors and writes a log only with `HB_NETLOG=1`. This is not a line-by-line review, and nothing links the shipped binaries to the source | Partly proven |
+| Game result | Not run | Unknown. Prove it: Adam starts the game from `CrossOver (FH5).app` |
+
+Meaning: the install is complete on disk and reversible. Whether the game runs is open. The fix targets `0x800705AA`, black objects and a loading-tips crash. It does not target the `ClockSkew.json` freeze of sets 19 and 20, so that freeze can come back.
+
 ## 5. External findings (Phase 4)
 
 Access date for all sources: 05/11/2026.
@@ -619,7 +639,7 @@ Source: a post that Adam pasted, plus the public README of `github.com/xvferxedd
 | Steam Cloud off with no local profile gives "INVALID PROFILE" | Not seen |
 | Not mentioned: `CONCRT140`, the Steam license agreement | Our `concrt140` and Steam-agreement findings are not in their report. Their Wine build may differ |
 
-License: GPL-3.0. This repo is MIT. Do not copy code from it into this repo. Facts and behavior descriptions are fine. Its prebuilt `d3d12.dll` is a binary from a third party: do not download or run it without Adam's approval and a check of the source. The author credits the FH4 repo owner (`whyAm-i`), Highball, a MACxus profile and Bridgeplay.
+License: GPL-3.0. This repo is MIT. Do not copy code from it into this repo. Facts and behavior descriptions are fine. Its prebuilt `d3d12.dll` is a binary from a third party: do not download or run it without Adam's approval and a check of the source. Adam approved the install on 11/11/2026 (decisions.md, D-024). The source check is partial (section 4, "Install of the upstream fix"). The author credits the FH4 repo owner (`whyAm-i`), Highball, a MACxus profile and Bridgeplay.
 
 ## 6. Feasibility rating
 
@@ -660,6 +680,8 @@ Reasons:
 
 Update 07/11/2026 (run set 19): with the proxy, clamp off and clamp on, the game freezes at "LOADING... PLEASE WAIT" after START. The debug log shows 198 repeated Xbox device sign-in requests, all answered with HTTP 200. The memory clamp is not the cause. The rating stays "possible". The new lead is the Xbox sign-in loop.
 
+Update 11/11/2026: the third-party fix is installed in the bottle `Steam forza 5` (section 4, "Install of the upstream fix"). No game run yet. The rating stays "possible". The next evidence is Adam's first run from the app copy.
+
 Missing evidence (why not "likely"):
 - No local launch log. Reports 1 and 2 say launch fails with CrossOver 26.0 and 25.0.
 - The Xbox sign-in with WebView2 needs a fix that this repo has not tested.
@@ -681,3 +703,4 @@ Each step needs approval from Adam.
 | 0 | Decided (D-011): run Phase 2 in a new clean bottle. Adam creates it in CrossOver, signs in to Steam himself and adds the SSD library folder. Quit the patched `Steam` bottle first so two Steam instances never share the library | Bottle exists. Steam shows FH5 as installed |
 | 6 | Find out who owns the FH4 repo. If it is not Adam, ask the owner for a license (open an issue only with Adam approval) | Written license reply |
 | 7 | If rendering is reached: capture input layouts with a minimal proxy | Offsets table from the census log |
+| 8 | Done on 11/11/2026: the third-party fix is installed (D-024). Next: Adam starts the game from `CrossOver (FH5).app` and reports the screen (INSTALL_MANUAL.md, step 9) | A run set 21 entry in section 4 |

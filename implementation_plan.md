@@ -95,4 +95,22 @@ Step 4 done on 07/11/2026 (set 19, research.md section 3): Adam pressed START wi
 
 5. Update 08/11/2026 (set 20): the game holds `ClockSkew.json` open (read only) during the freeze. With the file moved aside the freeze did not happen and the game crashed at `+0x92df62` (research.md section 3). Next, each needing approval: (a) read-only study of that crash site. (b) A repeat run with debug channels. (c) If the freeze comes back, a proxy shim that opens the file with write sharing. (d) A CodeWeavers report (Adam sends it). Descriptor and blend fixes stay on hold.
 
-Risks: the proxy cannot load the provider (the game has no graphics device), the patch breaks when the Wine build changes (refuse on a module check), a file in the game folder (remove to undo), and similarity to third-party code (D-019, a human review before release). The research phase rule "no patches" is lifted by Adam only for this plan.
+## Phase 6: third-party fix on CrossOver 26.3 (install done 11/11/2026, test open)
+
+Why: Adam asked to install `fh5-crossover-steam-fix` 1.0.1 in the bottle `Steam forza 5` (decisions.md, D-024). It targets `0x800705AA`, black objects and a loading-tips crash. It does not target the `ClockSkew.json` freeze. No code is copied into this repo. Guides: INSTALL_MANUAL.md and INSTALL_AI.md.
+
+Steps:
+
+1. [x] Read the scripts of the fix in full (11/11/2026).
+2. [x] `setup.sh --check` on the original app: 0 warnings.
+3. [x] Back up bottle files and the original ntdll (`evidence/private/pre-fh5fix/`).
+4. [x] Make an app copy, restore the stock `d3d12.dll` in the copy only, run `setup.sh`.
+5. [x] Add the 2 missing registry lines by hand (`setup.sh` skips an existing section).
+6. [x] Install the proxy in the game folder. Verify the files (research.md section 4).
+7. [ ] Adam starts the game from `CrossOver (FH5).app` and reports the screen.
+8. [ ] Record the result as run set 21 in research.md.
+9. [ ] If the result is bad, undo with the steps in INSTALL_MANUAL.md. Do not run `uninstall.sh` (it removes the whole `ForzaHorizon5.exe` override section).
+
+Risks: the DLLs have no proven link to their source. The game folder is shared with the main bottle `Steam`. A CrossOver update removes the app copy changes.
+
+Phase 5 risks: the proxy cannot load the provider (the game has no graphics device), the patch breaks when the Wine build changes (refuse on a module check), a file in the game folder (remove to undo), and similarity to third-party code (D-019, a human review before release). The research phase rule "no patches" is lifted by Adam only for this plan.
